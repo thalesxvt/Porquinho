@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Plus, Trash2, Tag, ShieldCheck, Check, Pencil } from 'lucide-react'
+import { Plus, Trash2, Tag, Check, Pencil } from 'lucide-react'
 import { useForm, Controller } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
@@ -154,23 +154,13 @@ export function Categories() {
           <p className="font-bold text-sm text-[#111111] truncate group-hover:text-black">
             {c.name}
           </p>
-          <div className="flex items-center gap-2 mt-0.5">
-            {c.isDefault ? (
-              <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-[#758695]">
-                <ShieldCheck size={12} className="text-[#758695]" />
-                Padrão
-              </span>
-            ) : (
-              <span className="text-[11px] font-medium text-[#111111] bg-[#F1ECDA] border border-[#DDD7C0] px-1.5 py-0.2 rounded">
-                Personalizada
-              </span>
-            )}
-            {c.type === 'BOTH' && (
+          {c.type === 'BOTH' && (
+            <div className="flex items-center gap-2 mt-0.5">
               <span className="text-[10px] font-semibold text-[#758695]">
-                • Ambos
+                Ambos
               </span>
-            )}
-          </div>
+            </div>
+          )}
         </div>
       </div>
 
@@ -185,16 +175,14 @@ export function Categories() {
           <Pencil size={15} />
         </button>
 
-        {!c.isDefault && (
-          <button
-            onClick={() => setDeleteTarget(c)}
-            className="flex h-8 w-8 items-center justify-center rounded-lg text-[#758695] hover:text-[#8A2B2B] hover:bg-[#C94A4A]/10 transition-colors cursor-pointer"
-            title="Excluir categoria"
-            aria-label={`Excluir ${c.name}`}
-          >
-            <Trash2 size={15} />
-          </button>
-        )}
+        <button
+          onClick={() => setDeleteTarget(c)}
+          className="flex h-8 w-8 items-center justify-center rounded-lg text-[#758695] hover:text-[#8A2B2B] hover:bg-[#C94A4A]/10 transition-colors cursor-pointer"
+          title="Excluir categoria"
+          aria-label={`Excluir ${c.name}`}
+        >
+          <Trash2 size={15} />
+        </button>
       </div>
     </div>
   )
