@@ -269,9 +269,9 @@ export function Dashboard() {
                         ))}
                       </Pie>
                       <Tooltip
-                        formatter={(value: any) => [
+                        formatter={(value: any, name: any) => [
                           formatCurrency(Number(value) * 100),
-                          'Gasto',
+                          name,
                         ]}
                         contentStyle={{
                           backgroundColor: '#ffffff',
