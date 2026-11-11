@@ -3,7 +3,7 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { Link, useNavigate } from 'react-router-dom'
-import { Eye, EyeOff, ArrowRight, Sparkles, CheckCircle2 } from 'lucide-react'
+import { Eye, EyeOff, ArrowRight, Sparkles, CheckCircle2, AlertCircle } from 'lucide-react'
 import { Button } from '../components/ui/Button'
 import { Input } from '../components/ui/Input'
 import { useAuthStore } from '../stores/auth.store'
@@ -27,6 +27,7 @@ type FormData = z.infer<typeof schema>
 
 export function Register() {
   const [showPassword, setShowPassword] = useState(false)
+  const [registerError, setRegisterError] = useState<string | null>(null)
   const navigate = useNavigate()
   const { login } = useAuthStore()
   const { toast } = useToast()
@@ -40,6 +41,7 @@ export function Register() {
   })
 
   const onSubmit = async (data: FormData) => {
+    setRegisterError(null)
     try {
       const res = await api.post('/auth/register', {
         name: data.name.trim(),
@@ -52,6 +54,7 @@ export function Register() {
     } catch (err: any) {
       const message =
         err.response?.data?.message || err.response?.data?.error || 'Erro ao criar conta. Tente outro e-mail.'
+      setRegisterError(message)
       toast(message, 'error')
     }
   }
@@ -126,6 +129,18 @@ export function Register() {
           {/* Card Form */}
           <div className="rounded-2xl border border-[#DDD7C0] bg-[#FAF8F2] p-7 sm:p-8 shadow-surface">
             <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
+              {registerError && (
+                <div
+                  role="alert"
+                  className="flex items-start gap-2.5 rounded-xl border border-rose-300 bg-rose-50/90 p-3 text-xs text-rose-900 transition-all"
+                >
+                  <AlertCircle size={16} className="shrink-0 text-rose-600 mt-0.5" />
+                  <div className="leading-relaxed font-medium">
+                    {registerError}
+                  </div>
+                </div>
+              )}
+
               <Input
                 label="Nome completo"
                 placeholder="Ex: Ana Silva"
