@@ -26,6 +26,22 @@ app.use(cors({
 }))
 app.use(express.json())
 
+// Root info
+app.get('/', (_req, res) => {
+  res.json({
+    name: '🐷 Porquinho API',
+    status: 'online',
+    version: '1.0.0',
+    endpoints: {
+      health: '/health',
+      auth: '/api/auth',
+      transactions: '/api/transactions',
+      categories: '/api/categories',
+      reports: '/api/reports',
+    },
+  })
+})
+
 // Health check
 app.get('/health', (_req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() })
