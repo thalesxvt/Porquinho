@@ -85,7 +85,7 @@ export function Transactions() {
   return (
     <PageLayout>
       <PageHeader
-        title="Movimentações"
+        title="Transações"
         description="Extrato detalhado, conciliação e histórico financeiro"
         action={
           <Button
@@ -94,7 +94,7 @@ export function Transactions() {
             leftIcon={<Plus size={16} className="text-[#F1ECDA] stroke-[2.5]" />}
             className="w-full sm:w-auto bg-[#111111] text-[#F1ECDA] hover:bg-[#222222] border-[#111111]"
           >
-            Nova movimentação
+            Nova transação
           </Button>
         }
       />
@@ -255,11 +255,11 @@ export function Transactions() {
             <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-600 mb-3 border border-emerald-100">
               <ReceiptText size={26} />
             </div>
-            <p className="text-base font-bold text-slate-800">Nenhuma movimentação encontrada</p>
+            <p className="text-base font-bold text-slate-800">Nenhuma transação encontrada</p>
             <p className="mt-1 text-xs text-slate-400 max-w-sm leading-relaxed">
               {hasActiveFilters
                 ? 'Nenhum lançamento corresponde aos filtros selecionados. Tente ajustar a busca.'
-                : 'Você ainda não registrou nenhuma movimentação financeira.'}
+                : 'Você ainda não registrou nenhuma transação financeira.'}
             </p>
             <div className="mt-5 flex gap-2.5">
               {hasActiveFilters ? (
@@ -284,7 +284,7 @@ export function Transactions() {
               <table className="w-full text-left border-collapse">
                 <thead>
                   <tr className="border-b border-[#DDD7C0] bg-[#F6F2E5]/80 text-[11px] font-bold uppercase tracking-wider text-[#5C6D7C]">
-                    <th className="py-3.5 px-6">Movimentação</th>
+                    <th className="py-3.5 px-6">Transação</th>
                     <th className="py-3.5 px-6">Categoria</th>
                     <th className="py-3.5 px-6">Data</th>
                     <th className="py-3.5 px-6 text-right">Valor</th>
@@ -362,7 +362,7 @@ export function Transactions() {
                               onClick={() => openModal(t)}
                               className="flex h-8 w-8 items-center justify-center rounded-lg text-[#758695] hover:text-[#111111] hover:bg-[#EFE9D5] transition-colors cursor-pointer"
                               title="Editar"
-                              aria-label="Editar movimentação"
+                              aria-label="Editar transação"
                             >
                               <Pencil size={15} />
                             </button>
@@ -370,7 +370,7 @@ export function Transactions() {
                               onClick={() => setDeleteTransaction(t)}
                               className="flex h-8 w-8 items-center justify-center rounded-lg text-[#758695] hover:text-[#8A2B2B] hover:bg-[#C94A4A]/10 transition-colors cursor-pointer"
                               title="Excluir"
-                              aria-label="Excluir movimentação"
+                              aria-label="Excluir transação"
                             >
                               <Trash2 size={15} />
                             </button>

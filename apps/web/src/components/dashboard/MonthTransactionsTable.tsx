@@ -64,7 +64,7 @@ export function MonthTransactionsTable({ selectedDate }: MonthTransactionsTableP
       <CardHeader className="border-b border-slate-100/90 pb-4 flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
         <div>
           <div className="flex items-center gap-2">
-            <CardTitle>Movimentações de {formattedMonth}</CardTitle>
+            <CardTitle>Transações de {formattedMonth}</CardTitle>
             <Badge variant="neutral">
               {transactions.length} {transactions.length === 1 ? 'item' : 'itens'}
             </Badge>
@@ -214,7 +214,7 @@ export function MonthTransactionsTable({ selectedDate }: MonthTransactionsTableP
               <ReceiptText size={22} />
             </div>
             <p className="text-sm font-bold text-slate-800">
-              Nenhuma movimentação em {formattedMonth}
+              Nenhuma transação em {formattedMonth}
             </p>
             <p className="mt-1 text-xs text-slate-400 max-w-sm">
               Não há registros para os filtros selecionados neste mês.
@@ -311,7 +311,7 @@ export function MonthTransactionsTable({ selectedDate }: MonthTransactionsTableP
                             <button
                               onClick={() => openModal(t)}
                               className="flex h-8 w-8 items-center justify-center rounded-lg text-[#758695] hover:text-[#111111] hover:bg-[#EFE9D5] transition-colors cursor-pointer"
-                              title="Editar movimentação"
+                              title="Editar transação"
                               aria-label={`Editar ${t.description}`}
                             >
                               <Pencil size={14} />
@@ -319,7 +319,7 @@ export function MonthTransactionsTable({ selectedDate }: MonthTransactionsTableP
                             <button
                               onClick={() => setDeleteTransaction(t)}
                               className="flex h-8 w-8 items-center justify-center rounded-lg text-[#758695] hover:text-[#8A2B2B] hover:bg-[#C94A4A]/10 transition-colors cursor-pointer"
-                              title="Excluir movimentação"
+                              title="Excluir transação"
                               aria-label={`Excluir ${t.description}`}
                             >
                               <Trash2 size={14} />

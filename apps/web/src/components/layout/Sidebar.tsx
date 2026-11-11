@@ -17,7 +17,7 @@ import { ProfileModal } from '../profile/ProfileModal'
 
 const navItems = [
   { to: '/', icon: LayoutDashboard, label: 'Dashboard' },
-  { to: '/transactions', icon: ArrowUpDown, label: 'Movimentações' },
+  { to: '/transactions', icon: ArrowUpDown, label: 'Transações' },
   { to: '/reports', icon: BarChart3, label: 'Relatórios' },
   { to: '/categories', icon: Tag, label: 'Categorias' },
 ]
@@ -44,7 +44,7 @@ export function Sidebar() {
           <button
             onClick={() => openModal()}
             className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#111111] text-[#F1ECDA] active:scale-95 transition-all shadow-sm cursor-pointer touch-manipulation"
-            aria-label="Nova movimentação"
+            aria-label="Nova transação"
           >
             <Plus size={19} className="stroke-[2.5]" />
           </button>
@@ -82,7 +82,7 @@ export function Sidebar() {
             className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#111111] px-4 py-2.5 text-xs font-bold text-[#F1ECDA] shadow-sm hover:bg-[#222222] active:bg-black active:scale-[0.98] transition-all cursor-pointer ring-1 ring-[#111111]"
           >
             <Plus size={15} className="text-[#F1ECDA] stroke-[2.5]" />
-            <span>Nova movimentação</span>
+            <span>Nova transação</span>
             <kbd className="ml-auto hidden xl:inline-block rounded bg-[#222222] px-1.5 py-0.5 text-[10px] font-mono text-[#758695]">
               N
             </kbd>
@@ -216,7 +216,7 @@ export function Sidebar() {
           <button
             onClick={() => openModal()}
             className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#111111] text-[#F1ECDA] shadow-elevated ring-4 ring-[#FAF8F2] active:scale-90 transition-all cursor-pointer touch-manipulation"
-            aria-label="Nova movimentação"
+            aria-label="Nova transação"
           >
             <Plus size={22} className="stroke-[2.5]" />
           </button>

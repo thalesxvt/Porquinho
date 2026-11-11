@@ -16,7 +16,7 @@ export function RecentTransactions() {
     <Card className="overflow-hidden">
       <CardHeader className="border-b border-slate-100/90 pb-4">
         <div>
-          <CardTitle>Últimas movimentações</CardTitle>
+          <CardTitle>Últimas transações</CardTitle>
           <p className="text-xs text-slate-400 font-medium mt-0.5">
             Lançamentos mais recentes da sua conta
           </p>
@@ -49,7 +49,7 @@ export function RecentTransactions() {
             <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-600 mb-3 border border-emerald-100">
               <ReceiptText size={22} />
             </div>
-            <p className="text-sm font-bold text-slate-800">Nenhuma movimentação registrada</p>
+            <p className="text-sm font-bold text-slate-800">Nenhuma transação registrada</p>
             <p className="mt-1 text-xs text-slate-400 max-w-xs leading-relaxed">
               Comece agora registrando sua primeira receita ou despesa para acompanhar seu progresso.
             </p>
@@ -58,7 +58,7 @@ export function RecentTransactions() {
               className="mt-4 inline-flex items-center gap-1.5 rounded-xl bg-zinc-950 px-4 py-2 text-xs font-bold text-white shadow-sm hover:bg-zinc-800 active:scale-95 transition-all cursor-pointer"
             >
               <Plus size={14} className="text-emerald-400" />
-              Registrar movimentação
+              Registrar transação
             </button>
           </div>
         ) : (

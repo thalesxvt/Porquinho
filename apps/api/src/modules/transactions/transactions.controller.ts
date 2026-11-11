@@ -38,7 +38,7 @@ export class TransactionsController {
       res.json({ data: transaction })
     } catch (error: unknown) {
       if (error instanceof Error && error.message === 'NOT_FOUND') {
-        res.status(404).json({ error: 'Movimentação não encontrada' })
+        res.status(404).json({ error: 'Transação não encontrada' })
         return
       }
       if (error instanceof Error && error.message === 'CATEGORY_NOT_FOUND') {
@@ -55,7 +55,7 @@ export class TransactionsController {
       res.status(204).send()
     } catch (error: unknown) {
       if (error instanceof Error && error.message === 'NOT_FOUND') {
-        res.status(404).json({ error: 'Movimentação não encontrada' })
+        res.status(404).json({ error: 'Transação não encontrada' })
         return
       }
       throw error

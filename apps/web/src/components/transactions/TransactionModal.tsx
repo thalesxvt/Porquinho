@@ -18,14 +18,14 @@ export function TransactionModal({ isOpen, onClose, transaction }: TransactionMo
     try {
       if (transaction?.id) {
         await updateMutation.mutateAsync({ id: transaction.id, ...data })
-        toast('Movimentação atualizada com sucesso!', 'success')
+        toast('Transação atualizada com sucesso!', 'success')
       } else {
         await createMutation.mutateAsync(data)
-        toast('Movimentação registrada com sucesso!', 'success')
+        toast('Transação registrada com sucesso!', 'success')
       }
       onClose()
     } catch {
-      toast('Erro ao salvar movimentação. Verifique os dados.', 'error')
+      toast('Erro ao salvar transação. Verifique os dados.', 'error')
     }
   }
 
@@ -33,7 +33,7 @@ export function TransactionModal({ isOpen, onClose, transaction }: TransactionMo
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      title={transaction ? 'Editar movimentação' : 'Nova movimentação'}
+      title={transaction ? 'Editar transação' : 'Nova transação'}
       description={
         transaction
           ? 'Altere os campos abaixo para atualizar o lançamento.'

@@ -16,17 +16,17 @@ export function DeleteConfirmModal({ isOpen, onClose, transaction }: DeleteConfi
   const handleDelete = async () => {
     try {
       await deleteMutation.mutateAsync(transaction.id)
-      toast('Movimentação excluída com sucesso')
+      toast('Transação excluída com sucesso')
       onClose()
     } catch {
-      toast('Erro ao excluir movimentação', 'error')
+      toast('Erro ao excluir transação', 'error')
     }
   }
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title="Excluir Movimentação" size="sm">
+    <Modal isOpen={isOpen} onClose={onClose} title="Excluir Transação" size="sm">
       <p className="mb-5 text-sm text-slate-600 leading-relaxed">
-        Tem certeza que deseja excluir a movimentação{' '}
+        Tem certeza que deseja excluir a transação{' '}
         <span className="font-bold text-slate-900">"{transaction?.description}"</span>?
         Esta ação não poderá ser desfeita.
       </p>

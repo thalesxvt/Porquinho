@@ -86,7 +86,7 @@ export function Dashboard() {
               leftIcon={<Plus size={16} className="text-[#F1ECDA] stroke-[2.5]" />}
               className="shrink-0 bg-[#111111] text-[#F1ECDA] hover:bg-[#222222] border-[#111111]"
             >
-              <span className="hidden xs:inline">Nova movimentação</span>
+              <span className="hidden xs:inline">Nova transação</span>
               <span className="xs:hidden">Novo</span>
             </Button>
           </div>

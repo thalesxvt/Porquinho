@@ -178,7 +178,7 @@ export function TransactionForm({
           isLoading={isLoading}
           className="w-full sm:w-auto"
         >
-          {defaultValues ? 'Salvar alterações' : 'Registrar movimentação'}
+          {defaultValues ? 'Salvar alterações' : 'Registrar transação'}
         </Button>
       </div>
     </form>

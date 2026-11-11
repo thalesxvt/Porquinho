@@ -122,7 +122,7 @@ export function Categories() {
       const msg =
         err.response?.data?.error ||
         err.response?.data?.message ||
-        'Não foi possível excluir a categoria. Verifique se há movimentações vinculadas.'
+        'Não foi possível excluir a categoria. Verifique se há transações vinculadas.'
       toast(msg, 'error')
     }
   }
@@ -286,7 +286,7 @@ export function Categories() {
         description={
           editingCategory
             ? 'Atualize o nome, tipo ou a cor de identificação da categoria.'
-            : 'Crie uma etiqueta personalizada para classificar suas movimentações.'
+            : 'Crie uma etiqueta personalizada para classificar suas transações.'
         }
         size="md"
       >

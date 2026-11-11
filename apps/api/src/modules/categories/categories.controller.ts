@@ -38,7 +38,7 @@ export class CategoriesController {
         return
       }
       if (error instanceof Error && error.message === 'HAS_TRANSACTIONS') {
-        res.status(409).json({ error: 'Categoria possui movimentações associadas' })
+        res.status(409).json({ error: 'Categoria possui transações associadas' })
         return
       }
       throw error

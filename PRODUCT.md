@@ -21,7 +21,7 @@ Controle financeiro pessoal direto, visual e rápido. Em vez de ferramentas banc
 
 ## Capabilities and Constraints
 - **Autenticação:** Cadastro e login de usuários seguros via token JWT.
-- **Movimentações:** Gestão completa (CRUD) de receitas e despesas com descrição, valor (em centavos no core), data e categoria vinculada.
+- **Transações:** Gestão completa (CRUD) de receitas e despesas com descrição, valor (em centavos no core), data e categoria vinculada.
 - **Painel de Controle:** Cards de KPI em tempo real (Saldo atual, Total de Receitas, Total de Despesas, Economia acumulada).
 - **Relatórios & Gráficos:** Filtros temporais (semana, mês, ano), evolução mensal anual e divisão de despesas por categoria (Recharts).
 - **Categorias:** Gerenciamento customizado de categorias com nomes e paletas de cores distintas.
@@ -34,7 +34,7 @@ Controle financeiro pessoal direto, visual e rápido. Em vez de ferramentas banc
 
 ## Product Principles
 1. **Clareza em Segundos:** Informações essenciais (saldo, receitas, despesas) compreensíveis no primeiro olhar.
-2. **Zero Atrito:** Registrar uma nova movimentação deve ser uma ação de segundos, sem formulários cansativos.
+2. **Zero Atrito:** Registrar uma nova transação deve ser uma ação de segundos, sem formulários cansativos.
 3. **Ergonomia e Fluidez:** Experiência consistente e confortável em telas móveis (bottom navigation, áreas de toque generosas) e desktops (painéis organizados).
 4. **Precisão e Confiabilidade:** Tratamento rigoroso de valores monetários com formatação local brasileira (R$ / BRL) e integridade visual dos dados.
 
