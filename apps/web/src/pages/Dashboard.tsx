@@ -146,7 +146,7 @@ export function Dashboard() {
               hideFooter
             />
             <KPICard
-              title={period === 'month' ? 'Poupado (Investimentos)' : 'Investimentos (Poupado)'}
+              title="Investimentos"
               value={totalInvested}
               variant="savings"
               icon={<PiggyBank size={19} />}

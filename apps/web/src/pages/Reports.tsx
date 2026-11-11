@@ -167,7 +167,7 @@ export function Reports() {
               icon={<TrendingDown size={19} />}
             />
             <KPICard
-              title={period === 'month' ? 'Poupado (Investimentos)' : 'Investimentos (Poupado)'}
+              title="Investimentos"
               value={totalInvested}
               previousValue={summary.previousInvested}
               variant="savings"
