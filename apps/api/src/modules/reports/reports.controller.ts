@@ -39,6 +39,11 @@ export class ReportsController {
     res.json({ data })
   }
 
+  async getAvailableMonths(req: AuthRequest, res: Response): Promise<void> {
+    const data = await service.getAvailableMonths(req.userId!)
+    res.json({ data })
+  }
+
   async getMonthly(req: AuthRequest, res: Response): Promise<void> {
     const year = parseInt(req.query.year as string) || new Date().getFullYear()
     const categoryId = (req.query.categoryId as string) || undefined

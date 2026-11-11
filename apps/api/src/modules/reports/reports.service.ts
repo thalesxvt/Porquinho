@@ -169,6 +169,22 @@ export class ReportsService {
     return results
   }
 
+  async getAvailableMonths(userId: string) {
+    const rows = await prisma.transaction.findMany({
+      where: { userId },
+      select: { date: true },
+      distinct: ['date'],
+    })
+
+    const monthSet = new Set<string>()
+    for (const row of rows) {
+      monthSet.add(format(row.date, 'yyyy-MM'))
+    }
+
+    return Array.from(monthSet)
+      .sort((a, b) => b.localeCompare(a)) // mais recente primeiro
+  }
+
   async getMonthly(userId: string, year: number, categoryId?: string) {
     const start = startOfYear(new Date(year, 0))
     const end = endOfYear(new Date(year, 0))

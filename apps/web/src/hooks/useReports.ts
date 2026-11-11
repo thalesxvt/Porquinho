@@ -49,6 +49,16 @@ export function useWeeklyReport(year: number, month: number) {
   })
 }
 
+export function useAvailableMonths() {
+  return useQuery({
+    queryKey: ['reports', 'available-months'],
+    queryFn: async () => {
+      const { data } = await api.get('/reports/available-months')
+      return data.data as string[] // ['2026-11', '2026-10', '2026-07', ...]
+    },
+  })
+}
+
 export function useMonthlyReport(year: number, categoryId?: string) {
   return useQuery({
     queryKey: ['reports', 'monthly', year, categoryId],

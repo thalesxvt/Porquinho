@@ -20,6 +20,7 @@ import { Card } from '../components/ui/Card'
 import { DeleteConfirmModal } from '../components/transactions/DeleteConfirmModal'
 import { useTransactions } from '../hooks/useTransactions'
 import { useCategories } from '../hooks/useCategories'
+import { useAvailableMonths } from '../hooks/useReports'
 import { formatCurrency, formatDateRelative, formatDate } from '../lib/formatters'
 import { TableRowSkeleton } from '../components/ui/Skeleton'
 import { useTransactionModalStore } from '../stores/transactionModal.store'
@@ -58,6 +59,14 @@ export function Transactions() {
   })
 
   const { data: categories = [] } = useCategories()
+  const { data: availableMonthsRaw = [] } = useAvailableMonths()
+
+  const monthOptions = (availableMonthsRaw as string[]).map((m) => {
+    const [year, month] = m.split('-').map(Number)
+    const date = new Date(year, month - 1, 1)
+    const label = date.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' })
+    return { value: m, label: label.charAt(0).toUpperCase() + label.slice(1) }
+  })
 
   const transactions = data?.data ?? []
   const totalPages = data?.totalPages ?? 1
@@ -187,12 +196,7 @@ export function Transactions() {
                 setPage(1)
               }}
               placeholder="Todos os meses"
-              options={[
-                { value: '2026-11', label: 'Novembro / 2026' },
-                { value: '2026-10', label: 'Outubro / 2026' },
-                { value: '2026-09', label: 'Setembro / 2026' },
-                { value: '2026-08', label: 'Agosto / 2026' },
-              ]}
+              options={monthOptions}
             />
           </div>
 
