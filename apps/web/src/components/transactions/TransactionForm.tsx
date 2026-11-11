@@ -134,6 +134,8 @@ export function TransactionForm({
         <Input
           label="Valor (R$)"
           placeholder="0,00"
+          type="text"
+          inputMode="decimal"
           className="tabular-nums font-semibold"
           leftIcon={<DollarSign size={16} />}
           error={errors.amount?.message}
