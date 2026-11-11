@@ -182,7 +182,7 @@ export function Sidebar() {
       />
 
       {/* Mobile Bottom Navigation Dock */}
-      <nav className="fixed bottom-0 left-0 right-0 z-40 flex items-center justify-around border-t border-[#DDD7C0] bg-[#FAF8F2]/95 px-2 pt-1.5 pb-[max(0.6rem,env(safe-area-inset-bottom))] backdrop-blur-md md:hidden shadow-lg">
+      <nav className="fixed bottom-0 left-0 right-0 z-40 grid grid-cols-5 items-center border-t border-[#DDD7C0] bg-[#FAF8F2]/95 px-1 pt-1.5 pb-[max(0.6rem,env(safe-area-inset-bottom))] backdrop-blur-md md:hidden shadow-lg">
         {navItems.slice(0, 2).map(({ to, icon: Icon, label }) => (
           <NavLink
             key={to}
@@ -190,7 +190,7 @@ export function Sidebar() {
             end={to === '/'}
             className={({ isActive }) =>
               cn(
-                'flex flex-col items-center justify-center min-w-[56px] min-h-[44px] py-1 px-2 text-[10px] font-semibold transition-all active:scale-95 touch-manipulation',
+                'flex w-full flex-col items-center justify-center min-h-[44px] py-1 px-0.5 text-[10px] font-semibold transition-all active:scale-95 touch-manipulation',
                 isActive ? 'text-[#111111] font-bold' : 'text-[#758695] hover:text-[#111111]'
               )
             }
@@ -205,14 +205,14 @@ export function Sidebar() {
                 >
                   <Icon size={18} />
                 </div>
-                <span>{label}</span>
+                <span className="truncate max-w-full tracking-tight mt-0.5">{label}</span>
               </>
             )}
           </NavLink>
         ))}
 
-        {/* Central Mobile Action Button */}
-        <div className="-mt-6 flex flex-col items-center">
+        {/* Central Mobile Action Button (Exact 50% center) */}
+        <div className="-mt-6 flex w-full flex-col items-center justify-center">
           <button
             onClick={() => openModal()}
             className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#111111] text-[#F1ECDA] shadow-elevated ring-4 ring-[#FAF8F2] active:scale-90 transition-all cursor-pointer touch-manipulation"
@@ -220,7 +220,7 @@ export function Sidebar() {
           >
             <Plus size={22} className="stroke-[2.5]" />
           </button>
-          <span className="text-[10px] font-bold text-[#758695] mt-0.5">Novo</span>
+          <span className="text-[10px] font-bold text-[#758695] mt-1">Novo</span>
         </div>
 
         {navItems.slice(2, 4).map(({ to, icon: Icon, label }) => (
@@ -230,7 +230,7 @@ export function Sidebar() {
             end={to === '/'}
             className={({ isActive }) =>
               cn(
-                'flex flex-col items-center justify-center min-w-[56px] min-h-[44px] py-1 px-2 text-[10px] font-semibold transition-all active:scale-95 touch-manipulation',
+                'flex w-full flex-col items-center justify-center min-h-[44px] py-1 px-0.5 text-[10px] font-semibold transition-all active:scale-95 touch-manipulation',
                 isActive ? 'text-[#111111] font-bold' : 'text-[#758695] hover:text-[#111111]'
               )
             }
@@ -245,7 +245,7 @@ export function Sidebar() {
                 >
                   <Icon size={18} />
                 </div>
-                <span>{label}</span>
+                <span className="truncate max-w-full tracking-tight mt-0.5">{label}</span>
               </>
             )}
           </NavLink>
