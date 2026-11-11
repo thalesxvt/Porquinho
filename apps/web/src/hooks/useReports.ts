@@ -54,7 +54,7 @@ export function useAvailableMonths() {
     queryKey: ['reports', 'available-months'],
     queryFn: async () => {
       const { data } = await api.get('/reports/available-months')
-      return data.data as string[] // ['2026-11', '2026-10', '2026-07', ...]
+      return data.data as string[] // ['2026-07', '2026-08', '2026-10', '2026-11'] — mais antigo primeiro
     },
   })
 }

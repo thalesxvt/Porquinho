@@ -10,6 +10,7 @@ import {
   useCategoryReport,
   useMonthlyReport,
   useWeeklyReport,
+  useAvailableMonths,
 } from '../hooks/useReports'
 import { formatCurrency } from '../lib/formatters'
 import { KPICard } from '../components/dashboard/KPICard'
@@ -52,6 +53,13 @@ export function Reports() {
       : undefined
 
   const { data: categories = [] } = useCategories()
+  const { data: availableMonthsRaw = [] } = useAvailableMonths()
+  const availableMonths = [...(availableMonthsRaw as string[])]
+    .reverse()
+    .map((m) => {
+      const [year, month] = m.split('-').map(Number)
+      return new Date(year, month - 1, 1)
+    })
   const { data: summary, isLoading: summaryLoading } = useSummary(period, dateParams)
   const { data: byCategory = [], isLoading: categoryLoading } = useCategoryReport(period, dateParams)
   const { data: monthly = [], isLoading: monthlyLoading } = useMonthlyReport(
@@ -104,6 +112,7 @@ export function Reports() {
           <MonthSelector
             selectedDate={selectedMonthDate}
             onChange={setSelectedMonthDate}
+            availableMonths={availableMonths.length > 0 ? availableMonths : undefined}
           />
         </div>
       )}

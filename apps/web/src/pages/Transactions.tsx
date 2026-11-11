@@ -64,8 +64,9 @@ export function Transactions() {
   const monthOptions = (availableMonthsRaw as string[]).map((m) => {
     const [year, month] = m.split('-').map(Number)
     const date = new Date(year, month - 1, 1)
-    const label = date.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' })
-    return { value: m, label: label.charAt(0).toUpperCase() + label.slice(1) }
+    const monthName = date.toLocaleDateString('pt-BR', { month: 'long' })
+    const formattedMonth = monthName.charAt(0).toUpperCase() + monthName.slice(1)
+    return { value: m, label: `${formattedMonth}/${year}` }
   })
 
   const transactions = data?.data ?? []

@@ -48,11 +48,13 @@ export function Dashboard() {
   const { data: monthly = [], isLoading: monthlyLoading } = useMonthlyReport(selectedMonthDate.getFullYear())
   const { data: availableMonthsRaw = [] } = useAvailableMonths()
 
-  // Convert 'yyyy-MM' strings to Date objects for MonthSelector
-  const availableMonths = availableMonthsRaw.map((m: string) => {
-    const [year, month] = m.split('-').map(Number)
-    return new Date(year, month - 1, 1)
-  })
+  // Convert 'yyyy-MM' strings to Date objects for MonthSelector (oldest first → most recent on the right)
+  const availableMonths = [...availableMonthsRaw]
+    .reverse()
+    .map((m: string) => {
+      const [year, month] = m.split('-').map(Number)
+      return new Date(year, month - 1, 1)
+    })
 
   const monthlyChartData = monthly.map((m: any) => ({
     name: m.monthLabel,
