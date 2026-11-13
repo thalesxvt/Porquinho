@@ -75,14 +75,28 @@ async function migrateUser(tx: Prisma.TransactionClient, userId: string) {
     const otherCount = await tx.transaction.count({ where: { categoryId: cat.id, type: { not: 'EXPENSE' } } })
 
     if (otherCount === 0) {
-      // Só despesas (ou vazia): a própria categoria vira INVESTMENT.
-      const moved = await tx.transaction.updateMany({
-        where: { categoryId: cat.id, type: 'EXPENSE' },
-        data: { type: 'INVESTMENT' },
+      // Só despesas (ou vazia). Se já existe INVESTMENT de mesmo nome (ex.: criada
+      // pela separação de "BOTH"), mescla nela e remove a original, que fica vazia.
+      const existing = await tx.category.findUnique({
+        where: { name_type_userId: { name: cat.name, type: 'INVESTMENT', userId } },
       })
-      await tx.category.update({ where: { id: cat.id }, data: { type: 'INVESTMENT' } })
-      stats.movedToInvestment += moved.count
-      stats.categoriesConverted++
+      if (existing) {
+        const moved = await tx.transaction.updateMany({
+          where: { categoryId: cat.id, type: 'EXPENSE' },
+          data: { type: 'INVESTMENT', categoryId: existing.id },
+        })
+        await tx.category.delete({ where: { id: cat.id } })
+        stats.movedToInvestment += moved.count
+      } else {
+        // A própria categoria vira INVESTMENT.
+        const moved = await tx.transaction.updateMany({
+          where: { categoryId: cat.id, type: 'EXPENSE' },
+          data: { type: 'INVESTMENT' },
+        })
+        await tx.category.update({ where: { id: cat.id }, data: { type: 'INVESTMENT' } })
+        stats.movedToInvestment += moved.count
+        stats.categoriesConverted++
+      }
     } else if (expenseCount > 0) {
       // Mistura (ex.: receitas de dividendos): mantém a categoria e leva só as despesas
       // para uma categoria de mesmo nome do tipo INVESTMENT.
