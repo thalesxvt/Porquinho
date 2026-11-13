@@ -1,3 +1,4 @@
+import { expenseBarShape } from '../components/charts/ExpenseBarShape'
 import { useState } from 'react'
 import {
   Plus,
@@ -231,7 +232,7 @@ export function Dashboard() {
                       }}
                     />
                     <Bar dataKey="Receitas" fill="#10b981" radius={[5, 5, 0, 0]} />
-                    <Bar dataKey="Despesas" stackId="saidas" fill="#f43f5e" />
+                    <Bar dataKey="Despesas" stackId="saidas" fill="#f43f5e" shape={expenseBarShape(5)} />
                     <Bar dataKey="Investimentos" stackId="saidas" fill="#3b82f6" radius={[5, 5, 0, 0]} />
                   </BarChart>
                 </ResponsiveContainer>
