@@ -87,7 +87,6 @@ export function Reports() {
 
   const expensePieData = byCategory
     .filter((c: any) => c.type === 'EXPENSE' || !c.type)
-    .slice(0, 8)
     .map((c: any) => ({
       name: c.categoryName,
       value: c.total / 100,

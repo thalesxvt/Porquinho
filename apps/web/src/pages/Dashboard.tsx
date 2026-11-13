@@ -65,7 +65,7 @@ export function Dashboard() {
     Saldo: (m.totalIncome - m.totalExpense - (m.totalInvested ?? 0)) / 100,
   }))
 
-  const pieData = byCategory.slice(0, 6).map((c: any) => ({
+  const pieData = byCategory.map((c: any) => ({
     name: c.categoryName,
     value: c.total / 100,
     color: c.categoryColor || '#64748b',
@@ -312,8 +312,8 @@ export function Dashboard() {
                   </div>
                 </div>
 
-                <div className="mt-3 flex flex-col gap-2 border-t border-slate-100 pt-3">
-                  {pieData.slice(0, 5).map((item: any, i: number) => {
+                <div className="mt-3 flex max-h-48 flex-col gap-2 overflow-y-auto border-t border-slate-100 pt-3">
+                  {pieData.map((item: any, i: number) => {
                     const pct =
                       totalExpensesInPie > 0
                         ? Math.round((item.value / totalExpensesInPie) * 100)
