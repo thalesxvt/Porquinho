@@ -72,14 +72,16 @@ export function Reports() {
     name: m.monthLabel,
     Receitas: m.totalIncome / 100,
     Despesas: m.totalExpense / 100,
-    Saldo: (m.totalIncome - m.totalExpense) / 100,
+    Investimentos: (m.totalInvested ?? 0) / 100,
+    Saldo: (m.totalIncome - m.totalExpense - (m.totalInvested ?? 0)) / 100,
   }))
 
   const weeklyChartData = weekly.map((w: any) => ({
     name: `Sem. ${w.week}`,
     Receitas: w.totalIncome / 100,
     Despesas: w.totalExpense / 100,
-    Saldo: (w.totalIncome - w.totalExpense) / 100,
+    Investimentos: (w.totalInvested ?? 0) / 100,
+    Saldo: (w.totalIncome - w.totalExpense - (w.totalInvested ?? 0)) / 100,
   }))
 
   const expensePieData = byCategory
@@ -173,7 +175,7 @@ export function Reports() {
               variant="savings"
               badgeText={totalIncome > 0 ? `${savingsRate}% da renda` : undefined}
               icon={<PiggyBank size={19} />}
-              subtext="Aporte na categoria Investimentos"
+              subtext="Aportes do período"
             />
           </>
         ) : null}
@@ -242,6 +244,10 @@ export function Reports() {
                 <span className="h-2.5 w-2.5 rounded-full bg-rose-500" />
                 Despesas
               </span>
+              <span className="inline-flex items-center gap-1.5 text-[#5C6D7C]">
+                <span className="h-2.5 w-2.5 rounded-full bg-blue-500" />
+                Investimentos
+              </span>
             </div>
           </div>
         </CardHeader>
@@ -294,7 +300,8 @@ export function Reports() {
                       }}
                     />
                     <Bar dataKey="Receitas" fill="#10b981" radius={[5, 5, 0, 0]} />
-                    <Bar dataKey="Despesas" fill="#f43f5e" radius={[5, 5, 0, 0]} />
+                    <Bar dataKey="Despesas" stackId="saidas" fill="#f43f5e" />
+                    <Bar dataKey="Investimentos" stackId="saidas" fill="#3b82f6" radius={[5, 5, 0, 0]} />
                   </BarChart>
                 ) : (
                   <AreaChart
@@ -309,6 +316,10 @@ export function Reports() {
                       <linearGradient id="expenseGrad" x1="0" y1="0" x2="0" y2="1">
                         <stop offset="5%" stopColor="#f43f5e" stopOpacity={0.35} />
                         <stop offset="95%" stopColor="#f43f5e" stopOpacity={0.0} />
+                      </linearGradient>
+                      <linearGradient id="investGrad" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.3} />
+                        <stop offset="95%" stopColor="#3b82f6" stopOpacity={0.0} />
                       </linearGradient>
                     </defs>
                     <CartesianGrid strokeDasharray="3 3" stroke="#DDD7C0" vertical={false} />
@@ -356,6 +367,14 @@ export function Reports() {
                       fillOpacity={1}
                       fill="url(#expenseGrad)"
                     />
+                    <Area
+                      type="monotone"
+                      dataKey="Investimentos"
+                      stroke="#3b82f6"
+                      strokeWidth={2.5}
+                      fillOpacity={1}
+                      fill="url(#investGrad)"
+                    />
                   </AreaChart>
                 )}
               </ResponsiveContainer>
@@ -381,6 +400,10 @@ export function Reports() {
               <span className="inline-flex items-center gap-1.5 text-[#5C6D7C]">
                 <span className="h-2 w-2 rounded-full bg-rose-500" />
                 Despesas
+              </span>
+              <span className="inline-flex items-center gap-1.5 text-[#5C6D7C]">
+                <span className="h-2.5 w-2.5 rounded-full bg-blue-500" />
+                Investimentos
               </span>
             </div>
           </CardHeader>
@@ -432,7 +455,8 @@ export function Reports() {
                       }}
                     />
                     <Bar dataKey="Receitas" fill="#10b981" radius={[4, 4, 0, 0]} />
-                    <Bar dataKey="Despesas" fill="#f43f5e" radius={[4, 4, 0, 0]} />
+                    <Bar dataKey="Despesas" stackId="saidas" fill="#f43f5e" />
+                    <Bar dataKey="Investimentos" stackId="saidas" fill="#3b82f6" radius={[4, 4, 0, 0]} />
                   </BarChart>
                 </ResponsiveContainer>
               </div>

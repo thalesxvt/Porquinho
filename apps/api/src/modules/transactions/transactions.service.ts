@@ -5,7 +5,7 @@ import type { CreateTransactionInput, UpdateTransactionInput } from '@porquinho/
 interface ListParams {
   page?: number
   limit?: number
-  type?: 'EXPENSE' | 'INCOME'
+  type?: 'EXPENSE' | 'INCOME' | 'INVESTMENT'
   categoryId?: string
   search?: string
   startDate?: string

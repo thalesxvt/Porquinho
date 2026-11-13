@@ -2,8 +2,6 @@ import { useState } from 'react'
 import {
   Pencil,
   Trash2,
-  ArrowUpRight,
-  ArrowDownLeft,
   Search,
   Plus,
   ReceiptText,
@@ -22,6 +20,7 @@ import { useSummary } from '../../hooks/useReports'
 import { formatCurrency, formatDate } from '../../lib/formatters'
 import { useTransactionModalStore } from '../../stores/transactionModal.store'
 import { cn } from '../../lib/utils'
+import { txStyle } from '../../lib/transactionStyle'
 
 interface MonthTransactionsTableProps {
   selectedDate: Date
@@ -29,7 +28,7 @@ interface MonthTransactionsTableProps {
 
 export function MonthTransactionsTable({ selectedDate }: MonthTransactionsTableProps) {
   const [search, setSearch] = useState('')
-  const [filterType, setFilterType] = useState<'' | 'EXPENSE' | 'INCOME'>('')
+  const [filterType, setFilterType] = useState<'' | 'EXPENSE' | 'INCOME' | 'INVESTMENT'>('')
   const [deleteTransaction, setDeleteTransaction] = useState<any>(null)
 
   const { openModal } = useTransactionModalStore()
@@ -56,7 +55,8 @@ export function MonthTransactionsTable({ selectedDate }: MonthTransactionsTableP
   const rolloverBalance = summary?.rolloverBalance ?? 0
   const totalIncome = summary?.totalIncome ?? 0
   const totalExpense = summary?.totalExpense ?? 0
-  const totalAvailable = summary?.balance ?? (rolloverBalance + (totalIncome - totalExpense))
+  const totalInvested = summary?.totalInvested ?? 0
+  const totalAvailable = summary?.balance ?? (rolloverBalance + (totalIncome - totalExpense - totalInvested))
 
   return (
     <Card className="overflow-hidden">
@@ -123,6 +123,16 @@ export function MonthTransactionsTable({ selectedDate }: MonthTransactionsTableP
             <span className="text-rose-700 font-medium truncate">Despesas:</span>
             <span className="font-extrabold text-rose-700 tabular-nums ml-auto sm:ml-0">
               -{formatCurrency(totalExpense)}
+            </span>
+          </div>
+
+          <span className="text-[#758695] hidden sm:inline font-bold">-</span>
+
+          {/* Investments of this month */}
+          <div className="inline-flex items-center gap-1.5 rounded-xl border border-blue-500/25 bg-blue-50 px-2.5 sm:px-3 py-1.5 min-w-0">
+            <span className="text-blue-700 font-medium truncate">Investimentos:</span>
+            <span className="font-extrabold text-blue-700 tabular-nums ml-auto sm:ml-0">
+              -{formatCurrency(totalInvested)}
             </span>
           </div>
 
@@ -193,6 +203,18 @@ export function MonthTransactionsTable({ selectedDate }: MonthTransactionsTableP
           >
             Despesas
           </button>
+          <button
+            type="button"
+            onClick={() => setFilterType('INVESTMENT')}
+            className={cn(
+              'flex-1 sm:flex-none rounded-lg px-3 py-1 text-xs font-bold transition-all cursor-pointer',
+              filterType === 'INVESTMENT'
+                ? 'bg-blue-600 text-white shadow-xs'
+                : 'text-[#5C6D7C] hover:text-[#111111]'
+            )}
+          >
+            Investimentos
+          </button>
         </div>
       </div>
 
@@ -248,7 +270,7 @@ export function MonthTransactionsTable({ selectedDate }: MonthTransactionsTableP
                 </thead>
                 <tbody className="divide-y divide-[#DDD7C0] text-sm">
                   {transactions.map((t: any) => {
-                    const isIncome = t.type === 'INCOME'
+                    const tx = txStyle(t.type)
                     return (
                       <tr
                         key={t.id}
@@ -260,16 +282,10 @@ export function MonthTransactionsTable({ selectedDate }: MonthTransactionsTableP
                             <div
                               className={cn(
                                 'flex h-8 w-8 shrink-0 items-center justify-center rounded-xl border shadow-xs',
-                                isIncome
-                                  ? 'bg-emerald-50 border-emerald-200 text-emerald-700'
-                                  : 'bg-rose-50 border-rose-200 text-rose-700'
+                                tx.box
                               )}
                             >
-                              {isIncome ? (
-                                <ArrowUpRight size={15} className="stroke-[2.5]" />
-                              ) : (
-                                <ArrowDownLeft size={15} className="stroke-[2.5]" />
-                              )}
+                              <tx.Icon size={15} className="stroke-[2.5]" />
                             </div>
                             <span className="font-bold text-[#111111] group-hover:text-black truncate">
                               {t.description}
@@ -298,10 +314,10 @@ export function MonthTransactionsTable({ selectedDate }: MonthTransactionsTableP
                           <span
                             className={cn(
                               'text-sm font-extrabold tabular-nums tracking-tight',
-                              isIncome ? 'text-emerald-700' : 'text-rose-700'
+                              tx.amount
                             )}
                           >
-                            {isIncome ? '+' : '-'}{formatCurrency(t.amountCents)}
+                            {tx.sign}{formatCurrency(t.amountCents)}
                           </span>
                         </td>
 
@@ -336,7 +352,7 @@ export function MonthTransactionsTable({ selectedDate }: MonthTransactionsTableP
             {/* Mobile Touch Cards View (per adapt skill guidelines) */}
             <div className="sm:hidden divide-y divide-[#DDD7C0] p-2">
               {transactions.map((t: any) => {
-                const isIncome = t.type === 'INCOME'
+                const tx = txStyle(t.type)
                 return (
                   <div key={t.id} className="p-3 flex flex-col gap-2.5">
                     <div className="flex items-start justify-between gap-2">
@@ -344,16 +360,10 @@ export function MonthTransactionsTable({ selectedDate }: MonthTransactionsTableP
                         <div
                           className={cn(
                             'flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border shadow-xs',
-                            isIncome
-                              ? 'bg-emerald-50 border-emerald-200 text-emerald-700'
-                              : 'bg-rose-50 border-rose-200 text-rose-700'
+                            tx.box
                           )}
                         >
-                          {isIncome ? (
-                            <ArrowUpRight size={16} className="stroke-[2.5]" />
-                          ) : (
-                            <ArrowDownLeft size={16} className="stroke-[2.5]" />
-                          )}
+                          <tx.Icon size={16} className="stroke-[2.5]" />
                         </div>
                         <div className="min-w-0">
                           <p className="font-bold text-sm text-[#111111] truncate">
@@ -368,10 +378,10 @@ export function MonthTransactionsTable({ selectedDate }: MonthTransactionsTableP
                       <span
                         className={cn(
                           'text-sm font-extrabold tabular-nums tracking-tight shrink-0',
-                          isIncome ? 'text-emerald-700' : 'text-rose-700'
+                          tx.amount
                         )}
                       >
-                        {isIncome ? '+' : '-'}{formatCurrency(t.amountCents)}
+                        {tx.sign}{formatCurrency(t.amountCents)}
                       </span>
                     </div>
 

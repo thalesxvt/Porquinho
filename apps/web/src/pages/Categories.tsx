@@ -37,7 +37,7 @@ const PRESET_COLORS = [
 
 const schema = z.object({
   name: z.string().min(1, 'Nome é obrigatório').max(50),
-  type: z.enum(['EXPENSE', 'INCOME', 'BOTH']),
+  type: z.enum(['EXPENSE', 'INCOME', 'INVESTMENT']),
   color: z.string().regex(/^#[0-9A-Fa-f]{6}$/, 'Cor inválida'),
 })
 
@@ -80,7 +80,7 @@ export function Categories() {
     setEditingCategory(category)
     reset({
       name: category.name,
-      type: category.type,
+      type: category.type === 'BOTH' ? 'EXPENSE' : category.type,
       color: category.color || PRESET_COLORS[0],
     })
     setModalOpen(true)
@@ -132,6 +132,10 @@ export function Categories() {
   )
   const incomeCategories = categories.filter(
     (c: any) => c.type === 'INCOME' || c.type === 'BOTH'
+  )
+
+  const investmentCategories = categories.filter(
+    (c: any) => c.type === 'INVESTMENT' || c.type === 'BOTH'
   )
 
   const renderCategoryCard = (c: any) => (
@@ -261,6 +265,35 @@ export function Categories() {
             )}
           </div>
         </Card>
+
+        {/* Investment categories */}
+        <Card className="overflow-hidden lg:col-span-2">
+          <CardHeader className="border-b border-slate-100/90 pb-3">
+            <div>
+              <CardTitle>Categorias de Investimento</CardTitle>
+              <CardDescription>Aportes e destinos de patrimônio</CardDescription>
+            </div>
+            <Badge variant="neutral">{investmentCategories.length}</Badge>
+          </CardHeader>
+
+          <div className="p-4 sm:p-5">
+            {isLoading ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                {[1, 2, 3].map((i) => (
+                  <Skeleton key={i} className="h-16 rounded-xl" />
+                ))}
+              </div>
+            ) : investmentCategories.length === 0 ? (
+              <div className="py-12 text-center text-xs text-slate-400">
+                Nenhuma categoria de investimento cadastrada.
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                {investmentCategories.map(renderCategoryCard)}
+              </div>
+            )}
+          </div>
+        </Card>
       </div>
 
       {/* Create / Edit Category Modal */}
@@ -319,15 +352,15 @@ export function Categories() {
                   </button>
                   <button
                     type="button"
-                    onClick={() => field.onChange('BOTH')}
+                    onClick={() => field.onChange('INVESTMENT')}
                     className={cn(
                       'rounded-lg py-2 text-xs font-bold transition-all cursor-pointer',
-                      field.value === 'BOTH'
-                        ? 'bg-zinc-950 text-white shadow-xs'
+                      field.value === 'INVESTMENT'
+                        ? 'bg-blue-600 text-white shadow-xs'
                         : 'text-slate-600 hover:text-slate-900'
                     )}
                   >
-                    Ambos
+                    Investimento
                   </button>
                 </div>
               )}
@@ -391,7 +424,7 @@ export function Categories() {
                     ? 'Despesa'
                     : currentType === 'INCOME'
                     ? 'Receita'
-                    : 'Ambos'}
+                    : 'Investimento'}
                 </Badge>
               </div>
             </div>

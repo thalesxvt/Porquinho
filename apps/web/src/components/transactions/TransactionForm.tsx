@@ -7,7 +7,7 @@ import { Input } from '../ui/Input'
 import { Select } from '../ui/Select'
 import { useCategories } from '../../hooks/useCategories'
 import { toCents, centsToFloat } from '../../lib/formatters'
-import { ArrowDownLeft, ArrowUpRight, DollarSign, Calendar, FileText } from 'lucide-react'
+import { ArrowDownLeft, ArrowUpRight, TrendingUp, DollarSign, Calendar, FileText } from 'lucide-react'
 
 const schema = z.object({
   description: z.string().min(1, 'Descrição é obrigatória').max(255),
@@ -18,7 +18,7 @@ const schema = z.object({
     },
     'Valor deve ser maior que zero'
   ),
-  type: z.enum(['EXPENSE', 'INCOME']),
+  type: z.enum(['EXPENSE', 'INCOME', 'INVESTMENT']),
   categoryId: z.string().min(1, 'Categoria é obrigatória'),
   date: z.string().min(1, 'Data é obrigatória'),
 })
@@ -90,7 +90,7 @@ export function TransactionForm({
           name="type"
           control={control}
           render={({ field }) => (
-            <div className="grid grid-cols-2 rounded-xl border border-[#DDD7C0] bg-[#F1ECDA] p-1 gap-1">
+            <div className="grid grid-cols-3 rounded-xl border border-[#DDD7C0] bg-[#F1ECDA] p-1 gap-1">
               <button
                 type="button"
                 onClick={() => field.onChange('EXPENSE')}
@@ -114,6 +114,18 @@ export function TransactionForm({
               >
                 <ArrowUpRight size={16} className="stroke-[2.5]" />
                 Receita
+              </button>
+              <button
+                type="button"
+                onClick={() => field.onChange('INVESTMENT')}
+                className={`flex items-center justify-center gap-2 rounded-lg py-2.5 text-xs font-bold transition-all cursor-pointer ${
+                  field.value === 'INVESTMENT'
+                    ? 'bg-blue-600 text-white shadow-sm'
+                    : 'text-[#5C6D7C] hover:text-[#111111] hover:bg-[#FAF8F2]/60'
+                }`}
+              >
+                <TrendingUp size={16} className="stroke-[2.5]" />
+                Investimento
               </button>
             </div>
           )}

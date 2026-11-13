@@ -10,11 +10,13 @@ datasource db {
 enum TransactionType {
   EXPENSE
   INCOME
+  INVESTMENT
 }
 
 enum CategoryType {
   EXPENSE
   INCOME
+  INVESTMENT
   BOTH
 }
 
@@ -41,7 +43,7 @@ model Category {
   transactions Transaction[]
   createdAt    DateTime      @default(now())
 
-  @@unique([name, userId])
+  @@unique([name, type, userId])
 }
 
 model Transaction {

@@ -60,7 +60,8 @@ export function Dashboard() {
     name: m.monthLabel,
     Receitas: m.totalIncome / 100,
     Despesas: m.totalExpense / 100,
-    Saldo: (m.totalIncome - m.totalExpense) / 100,
+    Investimentos: (m.totalInvested ?? 0) / 100,
+    Saldo: (m.totalIncome - m.totalExpense - (m.totalInvested ?? 0)) / 100,
   }))
 
   const pieData = byCategory.slice(0, 6).map((c: any) => ({
@@ -164,7 +165,7 @@ export function Dashboard() {
             <div>
               <CardTitle>Evolução Mensal</CardTitle>
               <CardDescription>
-                Histórico de receitas vs despesas de {selectedMonthDate.getFullYear()}
+                Histórico de receitas, despesas e investimentos de {selectedMonthDate.getFullYear()}
               </CardDescription>
             </div>
             <div className="flex items-center gap-3 text-xs font-bold">
@@ -175,6 +176,10 @@ export function Dashboard() {
               <span className="inline-flex items-center gap-1.5 text-[#5C6D7C]">
                 <span className="h-2.5 w-2.5 rounded-full bg-rose-500" />
                 Despesas
+              </span>
+              <span className="inline-flex items-center gap-1.5 text-[#5C6D7C]">
+                <span className="h-2.5 w-2.5 rounded-full bg-blue-500" />
+                Investimentos
               </span>
             </div>
           </CardHeader>
@@ -226,7 +231,8 @@ export function Dashboard() {
                       }}
                     />
                     <Bar dataKey="Receitas" fill="#10b981" radius={[5, 5, 0, 0]} />
-                    <Bar dataKey="Despesas" fill="#f43f5e" radius={[5, 5, 0, 0]} />
+                    <Bar dataKey="Despesas" stackId="saidas" fill="#f43f5e" />
+                    <Bar dataKey="Investimentos" stackId="saidas" fill="#3b82f6" radius={[5, 5, 0, 0]} />
                   </BarChart>
                 </ResponsiveContainer>
               </div>

@@ -1,11 +1,14 @@
 import { z } from 'zod'
 
-export const CategoryTypeEnum = z.enum(['EXPENSE', 'INCOME', 'BOTH'])
+export const CategoryTypeEnum = z.enum(['EXPENSE', 'INCOME', 'INVESTMENT', 'BOTH'])
 export type CategoryType = z.infer<typeof CategoryTypeEnum>
+
+// 'BOTH' existe apenas em categorias legadas; novas categorias escolhem um tipo.
+export const CategoryInputTypeEnum = z.enum(['EXPENSE', 'INCOME', 'INVESTMENT'])
 
 export const CreateCategorySchema = z.object({
   name: z.string().min(1, 'Nome é obrigatório').max(50),
-  type: CategoryTypeEnum,
+  type: CategoryInputTypeEnum,
   color: z.string().regex(/^#[0-9A-Fa-f]{6}$/, 'Cor inválida'),
   icon: z.string().optional(),
 })

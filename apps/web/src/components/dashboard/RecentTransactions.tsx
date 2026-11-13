@@ -1,10 +1,11 @@
-import { ArrowDownLeft, ArrowUpRight, ReceiptText, Plus, ChevronRight } from 'lucide-react'
+import { ReceiptText, Plus, ChevronRight } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { Card, CardHeader, CardTitle } from '../ui/Card'
 import { formatCurrency, formatDateRelative } from '../../lib/formatters'
 import { useTransactions } from '../../hooks/useTransactions'
 import { Skeleton } from '../ui/Skeleton'
 import { cn } from '../../lib/utils'
+import { txStyle } from '../../lib/transactionStyle'
 import { useTransactionModalStore } from '../../stores/transactionModal.store'
 
 export function RecentTransactions() {
@@ -64,7 +65,7 @@ export function RecentTransactions() {
         ) : (
           <div className="flex flex-col divide-y divide-slate-100">
             {transactions.map((t: any) => {
-              const isIncome = t.type === 'INCOME'
+              const tx = txStyle(t.type)
               return (
                 <div
                   key={t.id}
@@ -84,16 +85,10 @@ export function RecentTransactions() {
                   <div
                     className={cn(
                       'flex h-10 w-10 shrink-0 items-center justify-center rounded-xl transition-transform duration-150 group-hover:scale-105 shadow-xs border',
-                      isIncome
-                        ? 'bg-emerald-50 border-emerald-100 text-emerald-600'
-                        : 'bg-rose-50 border-rose-100 text-rose-600'
+                      tx.box
                     )}
                   >
-                    {isIncome ? (
-                      <ArrowUpRight size={17} className="stroke-[2.5]" />
-                    ) : (
-                      <ArrowDownLeft size={17} className="stroke-[2.5]" />
-                    )}
+                    <tx.Icon size={17} className="stroke-[2.5]" />
                   </div>
 
                   {/* Transaction Info */}
@@ -121,10 +116,10 @@ export function RecentTransactions() {
                     <span
                       className={cn(
                         'text-sm font-extrabold tabular-nums tracking-tight',
-                        isIncome ? 'text-emerald-600' : 'text-slate-900'
+                        tx.amount
                       )}
                     >
-                      {isIncome ? '+' : '-'}{formatCurrency(t.amountCents)}
+                      {tx.sign}{formatCurrency(t.amountCents)}
                     </span>
                   </div>
                 </div>

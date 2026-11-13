@@ -11,7 +11,8 @@
     "db:migrate": "prisma migrate dev",
     "db:seed": "ts-node prisma/seed.ts",
     "db:studio": "prisma studio",
-    "db:encrypt": "ts-node prisma/migrate-encrypt.ts"
+    "db:encrypt": "ts-node prisma/migrate-encrypt.ts",
+    "db:investments": "ts-node prisma/migrate-investments.ts"
   },
   "dependencies": {
     "@porquinho/types": "*",

@@ -1,6 +1,6 @@
 import { z } from 'zod'
 
-export const TransactionTypeEnum = z.enum(['EXPENSE', 'INCOME'])
+export const TransactionTypeEnum = z.enum(['EXPENSE', 'INCOME', 'INVESTMENT'])
 export type TransactionType = z.infer<typeof TransactionTypeEnum>
 
 export const CreateTransactionSchema = z.object({

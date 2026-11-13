@@ -19,10 +19,13 @@ const DEFAULT_CATEGORIES: Array<{
   { name: 'Compras',       type: 'EXPENSE', color: '#ec4899', icon: 'ShoppingBag' },
   { name: 'Assinaturas',   type: 'EXPENSE', color: '#6366f1', icon: 'CreditCard' },
   { name: 'Viagens',       type: 'EXPENSE', color: '#14b8a6', icon: 'Plane' },
-  { name: 'Outros',        type: 'BOTH',    color: '#6b7280', icon: 'MoreHorizontal' },
+  { name: 'Outros',        type: 'EXPENSE', color: '#6b7280', icon: 'MoreHorizontal' },
   { name: 'Salário',       type: 'INCOME',  color: '#22c55e', icon: 'Banknote' },
   { name: 'Freelance',     type: 'INCOME',  color: '#10b981', icon: 'Briefcase' },
-  { name: 'Investimentos', type: 'INCOME',  color: '#84cc16', icon: 'TrendingUp' },
+  { name: 'Outros',        type: 'INCOME',  color: '#6b7280', icon: 'MoreHorizontal' },
+  { name: 'Renda fixa',    type: 'INVESTMENT', color: '#3b82f6', icon: 'Landmark' },
+  { name: 'Ações',         type: 'INVESTMENT', color: '#6366f1', icon: 'TrendingUp' },
+  { name: 'Outros',        type: 'INVESTMENT', color: '#6b7280', icon: 'MoreHorizontal' },
 ]
 
 export class AuthService {

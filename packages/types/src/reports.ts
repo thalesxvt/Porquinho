@@ -5,13 +5,13 @@ export interface PeriodFilter {
 export interface Summary {
   totalIncome: number       // centavos do período
   totalExpense: number      // centavos do período
-  totalInvested: number     // centavos da categoria Investimentos no período (poupado real)
-  monthBalance: number      // centavos líquido do período (income - expense)
+  totalInvested: number     // centavos de transações do tipo INVESTMENT no período
+  monthBalance: number      // centavos líquido do período (income - expense - invested)
   rolloverBalance: number   // centavos saldo que sobrou do mês anterior
   balance: number           // centavos saldo total disponível (rolloverBalance + monthBalance)
   previousIncome: number
   previousExpense: number
-  previousInvested: number  // centavos da categoria Investimentos no período anterior
+  previousInvested: number  // centavos investidos no período anterior
   previousBalance: number
 }
 
@@ -30,6 +30,7 @@ export interface WeeklySummary {
   endDate: string
   totalExpense: number
   totalIncome: number
+  totalInvested: number
 }
 
 export interface MonthlySummary {
@@ -37,5 +38,6 @@ export interface MonthlySummary {
   monthLabel: string        // 'Jan', 'Fev', etc
   totalExpense: number
   totalIncome: number
+  totalInvested: number
   balance: number
 }

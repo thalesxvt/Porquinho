@@ -3,8 +3,6 @@ import {
   Plus,
   Pencil,
   Trash2,
-  ArrowUpRight,
-  ArrowDownLeft,
   Search,
   X,
   ChevronLeft,
@@ -25,11 +23,12 @@ import { formatCurrency, formatDateRelative, formatDate } from '../lib/formatter
 import { TableRowSkeleton } from '../components/ui/Skeleton'
 import { useTransactionModalStore } from '../stores/transactionModal.store'
 import { cn } from '../lib/utils'
+import { txStyle } from '../lib/transactionStyle'
 
 export function Transactions() {
   const [page, setPage] = useState(1)
   const [search, setSearch] = useState('')
-  const [type, setType] = useState<'' | 'EXPENSE' | 'INCOME'>('')
+  const [type, setType] = useState<'' | 'EXPENSE' | 'INCOME' | 'INVESTMENT'>('')
   const [categoryId, setCategoryId] = useState('')
   const [selectedMonth, setSelectedMonth] = useState('')
   const [deleteTransaction, setDeleteTransaction] = useState<any>(null)
@@ -80,6 +79,10 @@ export function Transactions() {
 
   const totalExpenseFiltered = transactions
     .filter((t: any) => t.type === 'EXPENSE')
+    .reduce((sum: number, t: any) => sum + t.amountCents, 0)
+
+  const totalInvestedFiltered = transactions
+    .filter((t: any) => t.type === 'INVESTMENT')
     .reduce((sum: number, t: any) => sum + t.amountCents, 0)
 
   const hasActiveFilters = Boolean(search || type || categoryId || selectedMonth)
@@ -186,6 +189,21 @@ export function Transactions() {
             >
               Receitas
             </button>
+            <button
+              type="button"
+              onClick={() => {
+                setType('INVESTMENT')
+                setPage(1)
+              }}
+              className={cn(
+                'flex-1 rounded-lg py-1.5 text-xs font-bold transition-all cursor-pointer',
+                type === 'INVESTMENT'
+                  ? 'bg-blue-600 text-white shadow-xs'
+                  : 'text-[#5C6D7C] hover:text-[#111111]'
+              )}
+            >
+              Invest.
+            </button>
           </div>
 
           {/* Month Filter */}
@@ -228,6 +246,10 @@ export function Transactions() {
             <span>•</span>
             <span className="text-rose-700">
               -{formatCurrency(totalExpenseFiltered)} em despesas
+            </span>
+            <span>•</span>
+            <span className="text-blue-700">
+              -{formatCurrency(totalInvestedFiltered)} em investimentos
             </span>
           </div>
 
@@ -298,7 +320,7 @@ export function Transactions() {
                 </thead>
                 <tbody className="divide-y divide-[#DDD7C0] text-sm">
                   {transactions.map((t: any) => {
-                    const isIncome = t.type === 'INCOME'
+                    const tx = txStyle(t.type)
                     return (
                       <tr
                         key={t.id}
@@ -310,16 +332,10 @@ export function Transactions() {
                             <div
                               className={cn(
                                 'flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border shadow-xs',
-                                isIncome
-                                  ? 'bg-emerald-50 border-emerald-200 text-emerald-700'
-                                  : 'bg-rose-50 border-rose-200 text-rose-700'
+                                tx.box
                               )}
                             >
-                              {isIncome ? (
-                                <ArrowUpRight size={16} className="stroke-[2.5]" />
-                              ) : (
-                                <ArrowDownLeft size={16} className="stroke-[2.5]" />
-                              )}
+                              <tx.Icon size={16} className="stroke-[2.5]" />
                             </div>
                             <div className="min-w-0">
                               <p className="font-bold text-[#111111] group-hover:text-black truncate">
@@ -353,10 +369,10 @@ export function Transactions() {
                           <span
                             className={cn(
                               'text-sm font-extrabold tabular-nums tracking-tight',
-                              isIncome ? 'text-emerald-700' : 'text-rose-700'
+                              tx.amount
                             )}
                           >
-                            {isIncome ? '+' : '-'}{formatCurrency(t.amountCents)}
+                            {tx.sign}{formatCurrency(t.amountCents)}
                           </span>
                         </td>
 
@@ -391,7 +407,7 @@ export function Transactions() {
             {/* Mobile Cards View */}
             <div className="sm:hidden divide-y divide-[#DDD7C0] p-2">
               {transactions.map((t: any) => {
-                const isIncome = t.type === 'INCOME'
+                const tx = txStyle(t.type)
                 return (
                   <div key={t.id} className="p-3 flex flex-col gap-2.5">
                     <div className="flex items-start justify-between gap-2">
@@ -399,16 +415,10 @@ export function Transactions() {
                         <div
                           className={cn(
                             'flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border shadow-xs',
-                            isIncome
-                              ? 'bg-emerald-50 border-emerald-200 text-emerald-700'
-                              : 'bg-rose-50 border-rose-200 text-rose-700'
+                            tx.box
                           )}
                         >
-                          {isIncome ? (
-                            <ArrowUpRight size={16} className="stroke-[2.5]" />
-                          ) : (
-                            <ArrowDownLeft size={16} className="stroke-[2.5]" />
-                          )}
+                          <tx.Icon size={16} className="stroke-[2.5]" />
                         </div>
                         <div className="min-w-0">
                           <p className="font-bold text-sm text-[#111111] truncate">
@@ -423,10 +433,10 @@ export function Transactions() {
                       <span
                         className={cn(
                           'text-sm font-extrabold tabular-nums tracking-tight shrink-0',
-                          isIncome ? 'text-emerald-700' : 'text-rose-700'
+                          tx.amount
                         )}
                       >
-                        {isIncome ? '+' : '-'}{formatCurrency(t.amountCents)}
+                        {tx.sign}{formatCurrency(t.amountCents)}
                       </span>
                     </div>
 

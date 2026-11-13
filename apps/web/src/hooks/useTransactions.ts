@@ -4,7 +4,7 @@ import { api } from '../lib/api'
 interface TransactionFilters {
   page?: number
   limit?: number
-  type?: 'EXPENSE' | 'INCOME'
+  type?: 'EXPENSE' | 'INCOME' | 'INVESTMENT'
   categoryId?: string
   search?: string
   startDate?: string

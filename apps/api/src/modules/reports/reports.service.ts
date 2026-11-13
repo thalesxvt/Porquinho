@@ -48,7 +48,9 @@ async function getTotals(userId: string, start: Date, end: Date, categoryId?: st
 
   const income = result.find((r) => r.type === 'INCOME')?._sum.amountCents ?? 0
   const expense = result.find((r) => r.type === 'EXPENSE')?._sum.amountCents ?? 0
-  return { income, expense, balance: income - expense }
+  const invested = result.find((r) => r.type === 'INVESTMENT')?._sum.amountCents ?? 0
+  // Investimento sai do caixa, mas não é despesa.
+  return { income, expense, invested, balance: income - expense - invested }
 }
 
 async function getPriorBalance(userId: string, beforeDate: Date) {
@@ -60,53 +62,33 @@ async function getPriorBalance(userId: string, beforeDate: Date) {
 
   const income = result.find((r) => r.type === 'INCOME')?._sum.amountCents ?? 0
   const expense = result.find((r) => r.type === 'EXPENSE')?._sum.amountCents ?? 0
-  return income - expense
-}
-
-async function getInvested(userId: string, start: Date, end: Date) {
-  const result = await prisma.transaction.aggregate({
-    where: {
-      userId,
-      type: 'EXPENSE',
-      date: { gte: start, lte: end },
-      category: {
-        name: {
-          contains: 'invest',
-          mode: 'insensitive',
-        },
-      },
-    },
-    _sum: { amountCents: true },
-  })
-
-  return result._sum.amountCents ?? 0
+  const invested = result.find((r) => r.type === 'INVESTMENT')?._sum.amountCents ?? 0
+  return income - expense - invested
 }
 
 export class ReportsService {
   async getSummary(userId: string, period: Period, referenceDate: Date = new Date()) {
     const range = getDateRange(period, referenceDate)
 
-    const [current, previous, rolloverBalance, currentInvested, previousInvested] = await Promise.all([
+    const [current, previous, rolloverBalance] = await Promise.all([
       getTotals(userId, range.start, range.end),
       getTotals(userId, range.previousStart, range.previousEnd),
       getPriorBalance(userId, range.start),
-      getInvested(userId, range.start, range.end),
-      getInvested(userId, range.previousStart, range.previousEnd),
     ])
 
-    const monthBalance = current.income - current.expense
+    const monthBalance = current.balance
     const totalBalance = rolloverBalance + monthBalance
 
     return {
       totalIncome: current.income,
       totalExpense: current.expense,
-      totalInvested: currentInvested,
+      totalInvested: current.invested,
       monthBalance,
       rolloverBalance,
       balance: totalBalance,
       previousIncome: previous.income,
       previousExpense: previous.expense,
-      previousInvested,
+      previousInvested: previous.invested,
       previousBalance: previous.balance,
     }
   }
@@ -162,6 +144,7 @@ export class ReportsService {
           endDate: weekEnd.toISOString(),
           totalExpense: totals.expense,
           totalIncome: totals.income,
+          totalInvested: totals.invested,
         }
       })
     )
@@ -200,6 +183,7 @@ export class ReportsService {
           monthLabel: format(monthStart, 'MMM', { locale: ptBR }),
           totalExpense: totals.expense,
           totalIncome: totals.income,
+          totalInvested: totals.invested,
           balance: totals.balance,
         }
       })
