@@ -18,6 +18,7 @@ function mapTransaction(t: any) {
     id: t.id,
     amountCents: t.amountCents,
     type: t.type,
+    paidByOthers: t.paidByOthers,
     description: decrypt(t.description),
     date: t.date.toISOString(),
     categoryId: t.categoryId,
@@ -103,6 +104,7 @@ export class TransactionsService {
       data: {
         amountCents: input.amountCents,
         type: input.type,
+        paidByOthers: input.type === 'EXPENSE' && input.paidByOthers === true,
         description: encrypt(input.description), // 🔐 Criptografado antes de salvar
         date: new Date(input.date),
         categoryId: input.categoryId,
@@ -125,11 +127,19 @@ export class TransactionsService {
       if (!category) throw new Error('CATEGORY_NOT_FOUND')
     }
 
+    // paidByOthers só faz sentido em despesas: se o tipo final não for EXPENSE, zera.
+    const finalType = input.type ?? transaction.type
+    const paidByOthers =
+      finalType !== 'EXPENSE'
+        ? false
+        : input.paidByOthers ?? transaction.paidByOthers
+
     const updated = await prisma.transaction.update({
       where: { id },
       data: {
         ...(input.amountCents !== undefined && { amountCents: input.amountCents }),
         ...(input.type !== undefined && { type: input.type }),
+        paidByOthers,
         // 🔐 Re-criptografa a nova descrição ao atualizar
         ...(input.description !== undefined && { description: encrypt(input.description) }),
         ...(input.date !== undefined && { date: new Date(input.date) }),

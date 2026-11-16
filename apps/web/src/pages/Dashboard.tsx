@@ -145,6 +145,11 @@ export function Dashboard() {
               value={summary.totalExpense}
               variant="expense"
               icon={<TrendingDown size={19} />}
+              subtext={
+                summary.totalPaidByOthers > 0
+                  ? `+ ${formatCurrency(summary.totalPaidByOthers)} pagos por outros`
+                  : undefined
+              }
               hideFooter
             />
             <KPICard

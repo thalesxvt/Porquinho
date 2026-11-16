@@ -1,3 +1,4 @@
+import { PaidByOthersBadge } from '../transactions/PaidByOthersBadge'
 import { ReceiptText, Plus, ChevronRight } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { Card, CardHeader, CardTitle } from '../ui/Card'
@@ -93,9 +94,12 @@ export function RecentTransactions() {
 
                   {/* Transaction Info */}
                   <div className="min-w-0 flex-1">
-                    <p className="truncate text-sm font-bold text-slate-900 group-hover:text-zinc-950">
-                      {t.description}
-                    </p>
+                    <div className="flex items-center gap-1.5 min-w-0">
+                      <p className="truncate text-sm font-bold text-slate-900 group-hover:text-zinc-950">
+                        {t.description}
+                      </p>
+                      {t.paidByOthers && <PaidByOthersBadge />}
+                    </div>
                     <div className="flex items-center gap-2 mt-0.5 text-xs text-slate-400 font-medium">
                       <span className="flex items-center gap-1">
                         <span

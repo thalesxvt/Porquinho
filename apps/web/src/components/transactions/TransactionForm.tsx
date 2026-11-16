@@ -21,6 +21,7 @@ const schema = z.object({
   type: z.enum(['EXPENSE', 'INCOME', 'INVESTMENT']),
   categoryId: z.string().min(1, 'Categoria é obrigatória'),
   date: z.string().min(1, 'Data é obrigatória'),
+  paidByOthers: z.boolean(),
 })
 
 type FormData = z.infer<typeof schema>
@@ -55,6 +56,7 @@ export function TransactionForm({
           type: defaultValues.type,
           categoryId: defaultValues.categoryId,
           date: format(new Date(defaultValues.date), 'yyyy-MM-dd'),
+          paidByOthers: defaultValues.paidByOthers ?? false,
         }
       : {
           type: 'EXPENSE',
@@ -62,6 +64,7 @@ export function TransactionForm({
           amount: '',
           description: '',
           categoryId: '',
+          paidByOthers: false,
         },
   })
 
@@ -78,6 +81,7 @@ export function TransactionForm({
       type: data.type,
       categoryId: data.categoryId,
       date: new Date(data.date + 'T12:00:00.000Z').toISOString(),
+      paidByOthers: data.type === 'EXPENSE' && data.paidByOthers,
     })
   }
 
@@ -174,6 +178,18 @@ export function TransactionForm({
         error={errors.categoryId?.message}
         {...register('categoryId')}
       />
+
+      {/* Despesa paga por outra pessoa (ex.: cartão dos pais) */}
+      {selectedType === 'EXPENSE' && (
+        <label className="flex cursor-pointer items-center gap-3 rounded-xl border border-[#DDD7C0] bg-[#FAF8F2] p-3 transition-colors hover:border-[#758695]">
+          <input
+            type="checkbox"
+            className="h-4 w-4 shrink-0 cursor-pointer accent-[#111111]"
+            {...register('paidByOthers')}
+          />
+          <span className="text-xs font-bold text-slate-700">Pago por terceiros</span>
+        </label>
+      )}
 
       {/* Action buttons */}
       <div className="flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-end gap-2.5 pt-4 mt-2 border-t border-slate-100">
