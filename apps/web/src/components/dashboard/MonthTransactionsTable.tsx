@@ -1,3 +1,4 @@
+import { PaidByOthersBadge } from '../transactions/PaidByOthersBadge'
 import { useState } from 'react'
 import {
   Pencil,
@@ -290,6 +291,7 @@ export function MonthTransactionsTable({ selectedDate }: MonthTransactionsTableP
                             <span className="font-bold text-[#111111] group-hover:text-black truncate">
                               {t.description}
                             </span>
+                            {t.paidByOthers && <PaidByOthersBadge />}
                           </div>
                         </td>
 
@@ -366,9 +368,12 @@ export function MonthTransactionsTable({ selectedDate }: MonthTransactionsTableP
                           <tx.Icon size={16} className="stroke-[2.5]" />
                         </div>
                         <div className="min-w-0">
-                          <p className="font-bold text-sm text-[#111111] truncate">
-                            {t.description}
-                          </p>
+                          <div className="flex items-center gap-1.5 min-w-0">
+                            <p className="font-bold text-sm text-[#111111] truncate">
+                              {t.description}
+                            </p>
+                            {t.paidByOthers && <PaidByOthersBadge />}
+                          </div>
                           <p className="text-[11px] text-[#758695] font-medium">
                             {formatDate(t.date)}
                           </p>

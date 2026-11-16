@@ -6,12 +6,14 @@ export interface Summary {
   totalIncome: number       // centavos do período
   totalExpense: number      // centavos do período
   totalInvested: number     // centavos de transações do tipo INVESTMENT no período
+  totalPaidByOthers: number // centavos de despesas pagas por terceiros (fora do saldo)
   monthBalance: number      // centavos líquido do período (income - expense - invested)
   rolloverBalance: number   // centavos saldo que sobrou do mês anterior
   balance: number           // centavos saldo total disponível (rolloverBalance + monthBalance)
   previousIncome: number
   previousExpense: number
   previousInvested: number  // centavos investidos no período anterior
+  previousPaidByOthers: number
   previousBalance: number
 }
 

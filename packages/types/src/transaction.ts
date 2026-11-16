@@ -9,6 +9,8 @@ export const CreateTransactionSchema = z.object({
   description: z.string().min(1, 'Descrição é obrigatória').max(255),
   date: z.string().datetime(),
   categoryId: z.string().cuid(),
+  // Só vale para despesas; a API grava false para os outros tipos.
+  paidByOthers: z.boolean().optional(),
 })
 
 export const UpdateTransactionSchema = CreateTransactionSchema.partial()
@@ -20,6 +22,7 @@ export interface Transaction {
   id: string
   amountCents: number
   type: TransactionType
+  paidByOthers: boolean
   description: string
   date: string
   categoryId: string

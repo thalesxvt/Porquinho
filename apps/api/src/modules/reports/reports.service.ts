@@ -41,22 +41,29 @@ async function getTotals(userId: string, start: Date, end: Date, categoryId?: st
   }
 
   const result = await prisma.transaction.groupBy({
-    by: ['type'],
+    by: ['type', 'paidByOthers'],
     where,
     _sum: { amountCents: true },
   })
 
-  const income = result.find((r) => r.type === 'INCOME')?._sum.amountCents ?? 0
-  const expense = result.find((r) => r.type === 'EXPENSE')?._sum.amountCents ?? 0
-  const invested = result.find((r) => r.type === 'INVESTMENT')?._sum.amountCents ?? 0
+  const sum = (type: string, paidByOthers = false) =>
+    result
+      .filter((r) => r.type === type && r.paidByOthers === paidByOthers)
+      .reduce((acc, r) => acc + (r._sum.amountCents ?? 0), 0)
+
+  const income = sum('INCOME')
+  const expense = sum('EXPENSE')
+  const invested = sum('INVESTMENT')
+  // Despesas pagas por terceiros ficam fora do saldo e do total de despesas.
+  const paidByOthers = sum('EXPENSE', true)
   // Investimento sai do caixa, mas não é despesa.
-  return { income, expense, invested, balance: income - expense - invested }
+  return { income, expense, invested, paidByOthers, balance: income - expense - invested }
 }
 
 async function getPriorBalance(userId: string, beforeDate: Date) {
   const result = await prisma.transaction.groupBy({
     by: ['type'],
-    where: { userId, date: { lt: beforeDate } },
+    where: { userId, paidByOthers: false, date: { lt: beforeDate } },
     _sum: { amountCents: true },
   })
 
@@ -83,12 +90,14 @@ export class ReportsService {
       totalIncome: current.income,
       totalExpense: current.expense,
       totalInvested: current.invested,
+      totalPaidByOthers: current.paidByOthers,
       monthBalance,
       rolloverBalance,
       balance: totalBalance,
       previousIncome: previous.income,
       previousExpense: previous.expense,
       previousInvested: previous.invested,
+      previousPaidByOthers: previous.paidByOthers,
       previousBalance: previous.balance,
     }
   }
@@ -101,6 +110,7 @@ export class ReportsService {
       where: {
         userId,
         type: 'EXPENSE',
+        paidByOthers: false,
         date: { gte: range.start, lte: range.end },
       },
       _sum: { amountCents: true },

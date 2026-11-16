@@ -50,6 +50,8 @@ model Transaction {
   id          String          @id @default(cuid())
   amountCents Int
   type        TransactionType
+  // Despesa paga por terceiros (ex.: cartão dos pais): registrada, mas não sai do saldo.
+  paidByOthers Boolean        @default(false)
   description String
   date        DateTime
   categoryId  String
@@ -61,5 +63,6 @@ model Transaction {
 
   @@index([userId, date])
   @@index([userId, type])
+  @@index([userId, paidByOthers])
   @@index([categoryId])
 }
