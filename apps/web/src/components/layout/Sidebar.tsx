@@ -8,7 +8,9 @@ import {
   LogOut,
   Plus,
   Settings,
+  Wallet,
 } from 'lucide-react'
+import { AccountSwitcher } from '../accounts/AccountSwitcher'
 import { cn } from '../../lib/utils'
 import { useAuthStore } from '../../stores/auth.store'
 import { useTransactionModalStore } from '../../stores/transactionModal.store'
@@ -20,6 +22,8 @@ const navItems = [
   { to: '/transactions', icon: ArrowUpDown, label: 'Transações' },
   { to: '/reports', icon: BarChart3, label: 'Relatórios' },
   { to: '/categories', icon: Tag, label: 'Categorias' },
+  // Só no menu desktop; no mobile, "Gerenciar contas" fica no seletor de conta.
+  { to: '/accounts', icon: Wallet, label: 'Contas' },
 ]
 
 export function Sidebar() {
@@ -39,8 +43,11 @@ export function Sidebar() {
     <>
       {/* Top Mobile Header */}
       <header className="fixed top-0 left-0 right-0 z-40 flex h-16 items-center justify-between border-b border-[#DDD7C0] bg-[#FAF8F2]/95 px-4 backdrop-blur-md md:hidden">
-        <PorquinhoLogo size="sm" subtitle="Finanças" />
-        <div className="flex items-center gap-1.5">
+        <div className="flex min-w-0 items-center gap-2">
+          <PorquinhoLogo size="sm" showText={false} />
+          <AccountSwitcher compact />
+        </div>
+        <div className="flex shrink-0 items-center gap-1.5">
           <button
             onClick={() => openModal()}
             className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#111111] text-[#F1ECDA] active:scale-95 transition-all shadow-sm cursor-pointer touch-manipulation"
@@ -74,8 +81,13 @@ export function Sidebar() {
           <PorquinhoLogo size="md"/>
         </div>
 
+        {/* Conta ativa */}
+        <div className="px-4 pt-4">
+          <AccountSwitcher />
+        </div>
+
         {/* Quick Action Button */}
-        <div className="px-4 pt-4 pb-1">
+        <div className="px-4 pt-3 pb-1">
           <button
             type="button"
             onClick={() => openModal()}

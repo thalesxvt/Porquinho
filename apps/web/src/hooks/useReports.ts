@@ -1,5 +1,6 @@
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, type UseQueryResult } from '@tanstack/react-query'
 import { api } from '../lib/api'
+import { useActiveAccount } from './useAccounts'
 
 export type Period = 'week' | 'month' | 'year'
 
@@ -9,65 +10,64 @@ export interface ReportDateParams {
   month?: number
 }
 
-export function useSummary(period: Period, params?: ReportDateParams) {
-  return useQuery({
-    queryKey: ['reports', 'summary', period, params],
+/**
+ * Todos os relatórios são da conta ativa. Enquanto a conta ainda não carregou,
+ * a consulta fica desligada e é reportada como carregando (mostra skeleton).
+ */
+function useAccountQuery<T>(key: unknown[], path: (sp: URLSearchParams) => string): UseQueryResult<T> & { isLoading: boolean } {
+  const { accountId } = useActiveAccount()
+  const query = useQuery({
+    queryKey: ['reports', ...key, accountId],
+    enabled: Boolean(accountId),
     queryFn: async () => {
       const sp = new URLSearchParams()
-      sp.set('period', period)
-      if (params?.date) sp.set('date', params.date)
-      if (params?.year) sp.set('year', String(params.year))
-      if (params?.month) sp.set('month', String(params.month))
-      const { data } = await api.get(`/reports/summary?${sp.toString()}`)
-      return data.data
+      sp.set('accountId', accountId!)
+      const { data } = await api.get(path(sp))
+      return data.data as T
     },
+  })
+  return Object.assign(query, { isLoading: query.isLoading || !accountId })
+}
+
+function setDateParams(sp: URLSearchParams, params?: ReportDateParams) {
+  if (params?.date) sp.set('date', params.date)
+  if (params?.year) sp.set('year', String(params.year))
+  if (params?.month) sp.set('month', String(params.month))
+}
+
+export function useSummary(period: Period, params?: ReportDateParams) {
+  return useAccountQuery<any>(['summary', period, params], (sp) => {
+    sp.set('period', period)
+    setDateParams(sp, params)
+    return `/reports/summary?${sp.toString()}`
   })
 }
 
 export function useCategoryReport(period: Period, params?: ReportDateParams) {
-  return useQuery({
-    queryKey: ['reports', 'by-category', period, params],
-    queryFn: async () => {
-      const sp = new URLSearchParams()
-      sp.set('period', period)
-      if (params?.date) sp.set('date', params.date)
-      if (params?.year) sp.set('year', String(params.year))
-      if (params?.month) sp.set('month', String(params.month))
-      const { data } = await api.get(`/reports/by-category?${sp.toString()}`)
-      return data.data as any[]
-    },
+  return useAccountQuery<any[]>(['by-category', period, params], (sp) => {
+    sp.set('period', period)
+    setDateParams(sp, params)
+    return `/reports/by-category?${sp.toString()}`
   })
 }
 
 export function useWeeklyReport(year: number, month: number) {
-  return useQuery({
-    queryKey: ['reports', 'weekly', year, month],
-    queryFn: async () => {
-      const { data } = await api.get(`/reports/weekly?year=${year}&month=${month}`)
-      return data.data as any[]
-    },
+  return useAccountQuery<any[]>(['weekly', year, month], (sp) => {
+    sp.set('year', String(year))
+    sp.set('month', String(month))
+    return `/reports/weekly?${sp.toString()}`
   })
 }
 
 export function useAvailableMonths() {
-  return useQuery({
-    queryKey: ['reports', 'available-months'],
-    queryFn: async () => {
-      const { data } = await api.get('/reports/available-months')
-      return data.data as string[] // ['2026-07', '2026-08', '2026-10', '2026-11'] — mais antigo primeiro
-    },
-  })
+  // ['2026-11', '2026-10', ...] — mais recente primeiro
+  return useAccountQuery<string[]>(['available-months'], (sp) => `/reports/available-months?${sp.toString()}`)
 }
 
 export function useMonthlyReport(year: number, categoryId?: string) {
-  return useQuery({
-    queryKey: ['reports', 'monthly', year, categoryId],
-    queryFn: async () => {
-      const sp = new URLSearchParams()
-      sp.set('year', String(year))
-      if (categoryId) sp.set('categoryId', categoryId)
-      const { data } = await api.get(`/reports/monthly?${sp.toString()}`)
-      return data.data as any[]
-    },
+  return useAccountQuery<any[]>(['monthly', year, categoryId], (sp) => {
+    sp.set('year', String(year))
+    if (categoryId) sp.set('categoryId', categoryId)
+    return `/reports/monthly?${sp.toString()}`
   })
 }

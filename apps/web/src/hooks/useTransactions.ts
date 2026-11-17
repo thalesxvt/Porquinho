@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { api } from '../lib/api'
+import { useActiveAccount } from './useAccounts'
 
 interface TransactionFilters {
   page?: number
@@ -11,11 +12,15 @@ interface TransactionFilters {
   endDate?: string
 }
 
+/** Lista as transações da conta ativa. */
 export function useTransactions(filters: TransactionFilters = {}) {
-  return useQuery({
-    queryKey: ['transactions', filters],
+  const { accountId } = useActiveAccount()
+  const query = useQuery({
+    queryKey: ['transactions', filters, accountId],
+    enabled: Boolean(accountId),
     queryFn: async () => {
       const params = new URLSearchParams()
+      params.set('accountId', accountId!)
       Object.entries(filters).forEach(([k, v]) => {
         if (v !== undefined && v !== '') params.set(k, String(v))
       })
@@ -23,45 +28,47 @@ export function useTransactions(filters: TransactionFilters = {}) {
       return data.data
     },
   })
+  return Object.assign(query, { isLoading: query.isLoading || !accountId })
+}
+
+function useInvalidateAfterChange() {
+  const qc = useQueryClient()
+  return () => {
+    qc.invalidateQueries({ queryKey: ['transactions'] })
+    qc.invalidateQueries({ queryKey: ['reports'] })
+    // O saldo de cada conta aparece no seletor de contas.
+    qc.invalidateQueries({ queryKey: ['accounts'] })
+  }
 }
 
 export function useCreateTransaction() {
-  const qc = useQueryClient()
+  const invalidate = useInvalidateAfterChange()
   return useMutation({
     mutationFn: async (input: any) => {
       const { data } = await api.post('/transactions', input)
       return data.data
     },
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ['transactions'] })
-      qc.invalidateQueries({ queryKey: ['reports'] })
-    },
+    onSuccess: invalidate,
   })
 }
 
 export function useUpdateTransaction() {
-  const qc = useQueryClient()
+  const invalidate = useInvalidateAfterChange()
   return useMutation({
     mutationFn: async ({ id, ...input }: any) => {
       const { data } = await api.put(`/transactions/${id}`, input)
       return data.data
     },
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ['transactions'] })
-      qc.invalidateQueries({ queryKey: ['reports'] })
-    },
+    onSuccess: invalidate,
   })
 }
 
 export function useDeleteTransaction() {
-  const qc = useQueryClient()
+  const invalidate = useInvalidateAfterChange()
   return useMutation({
     mutationFn: async (id: string) => {
       await api.delete(`/transactions/${id}`)
     },
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ['transactions'] })
-      qc.invalidateQueries({ queryKey: ['reports'] })
-    },
+    onSuccess: invalidate,
   })
 }

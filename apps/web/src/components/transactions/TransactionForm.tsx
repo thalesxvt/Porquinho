@@ -6,6 +6,7 @@ import { Button } from '../ui/Button'
 import { Input } from '../ui/Input'
 import { Select } from '../ui/Select'
 import { useCategories } from '../../hooks/useCategories'
+import { useActiveAccount } from '../../hooks/useAccounts'
 import { toCents, centsToFloat } from '../../lib/formatters'
 import { ArrowDownLeft, ArrowUpRight, TrendingUp, DollarSign, Calendar, FileText } from 'lucide-react'
 
@@ -20,6 +21,8 @@ const schema = z.object({
   ),
   type: z.enum(['EXPENSE', 'INCOME', 'INVESTMENT']),
   categoryId: z.string().min(1, 'Categoria é obrigatória'),
+  // Vazio só se as contas ainda não carregaram: a API usa a conta padrão.
+  accountId: z.string(),
   date: z.string().min(1, 'Data é obrigatória'),
   paidByOthers: z.boolean(),
 })
@@ -40,6 +43,9 @@ export function TransactionForm({
   defaultValues,
 }: TransactionFormProps) {
   const { data: categories = [] } = useCategories()
+  const { accounts, accountId: activeAccountId } = useActiveAccount()
+  // Edição mantém a conta da transação; criação usa a conta ativa no seletor.
+  const initialAccountId = defaultValues?.accountId ?? activeAccountId ?? ''
 
   const {
     register,
@@ -55,6 +61,7 @@ export function TransactionForm({
           amount: centsToFloat(defaultValues.amountCents),
           type: defaultValues.type,
           categoryId: defaultValues.categoryId,
+          accountId: initialAccountId,
           date: format(new Date(defaultValues.date), 'yyyy-MM-dd'),
           paidByOthers: defaultValues.paidByOthers ?? false,
         }
@@ -64,6 +71,7 @@ export function TransactionForm({
           amount: '',
           description: '',
           categoryId: '',
+          accountId: initialAccountId,
           paidByOthers: false,
         },
   })
@@ -80,6 +88,7 @@ export function TransactionForm({
       amountCents: toCents(data.amount),
       type: data.type,
       categoryId: data.categoryId,
+      accountId: data.accountId || undefined,
       date: new Date(data.date + 'T12:00:00.000Z').toISOString(),
       paidByOthers: data.type === 'EXPENSE' && data.paidByOthers,
     })
@@ -178,6 +187,16 @@ export function TransactionForm({
         error={errors.categoryId?.message}
         {...register('categoryId')}
       />
+
+      {/* Conta: só aparece quando há mais de uma */}
+      {accounts.length > 1 && (
+        <Select
+          label="Conta"
+          options={accounts.map((a) => ({ value: a.id, label: a.name }))}
+          error={errors.accountId?.message}
+          {...register('accountId')}
+        />
+      )}
 
       {/* Despesa paga por outra pessoa (ex.: cartão dos pais) */}
       {selectedType === 'EXPENSE' && (

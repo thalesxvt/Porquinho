@@ -1,8 +1,10 @@
 import { prisma } from '../../lib/prisma'
 import { encrypt, decrypt } from '../../utils/encryption'
+import { resolveAccountId } from '../accounts/accounts.service'
 import type { CreateTransactionInput, UpdateTransactionInput } from '@porquinho/types'
 
 interface ListParams {
+  accountId?: string
   page?: number
   limit?: number
   type?: 'EXPENSE' | 'INCOME' | 'INVESTMENT'
@@ -25,6 +27,7 @@ function mapTransaction(t: any) {
     categoryName: t.category.name,
     categoryColor: t.category.color,
     categoryIcon: t.category.icon,
+    accountId: t.accountId,
     createdAt: t.createdAt.toISOString(),
     updatedAt: t.updatedAt.toISOString(),
   }
@@ -36,7 +39,7 @@ export class TransactionsService {
     const limit = params.limit ?? 20
     const skip = (page - 1) * limit
 
-    const where: any = { userId }
+    const where: any = { userId, accountId: await resolveAccountId(userId, params.accountId) }
 
     if (params.type) where.type = params.type
     if (params.categoryId) where.categoryId = params.categoryId
@@ -100,6 +103,8 @@ export class TransactionsService {
     })
     if (!category) throw new Error('CATEGORY_NOT_FOUND')
 
+    const accountId = await resolveAccountId(userId, input.accountId)
+
     const transaction = await prisma.transaction.create({
       data: {
         amountCents: input.amountCents,
@@ -108,6 +113,7 @@ export class TransactionsService {
         description: encrypt(input.description), // 🔐 Criptografado antes de salvar
         date: new Date(input.date),
         categoryId: input.categoryId,
+        accountId,
         userId,
       },
       include: { category: { select: { name: true, color: true, icon: true } } },
@@ -127,6 +133,9 @@ export class TransactionsService {
       if (!category) throw new Error('CATEGORY_NOT_FOUND')
     }
 
+    // Mover a transação para outra conta: valida que a conta é do usuário.
+    const accountId = input.accountId ? await resolveAccountId(userId, input.accountId) : undefined
+
     // paidByOthers só faz sentido em despesas: se o tipo final não for EXPENSE, zera.
     const finalType = input.type ?? transaction.type
     const paidByOthers =
@@ -144,6 +153,7 @@ export class TransactionsService {
         ...(input.description !== undefined && { description: encrypt(input.description) }),
         ...(input.date !== undefined && { date: new Date(input.date) }),
         ...(input.categoryId !== undefined && { categoryId: input.categoryId }),
+        ...(accountId !== undefined && { accountId }),
       },
       include: { category: { select: { name: true, color: true, icon: true } } },
     })
