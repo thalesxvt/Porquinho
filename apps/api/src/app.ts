@@ -6,6 +6,7 @@ import { authRoutes } from './modules/auth/auth.routes'
 import { categoriesRoutes } from './modules/categories/categories.routes'
 import { transactionsRoutes } from './modules/transactions/transactions.routes'
 import { reportsRoutes } from './modules/reports/reports.routes'
+import { accountsRoutes } from './modules/accounts/accounts.routes'
 import { errorHandler } from './middleware/error.middleware'
 
 export const app = express()
@@ -37,6 +38,7 @@ app.get('/', (_req, res) => {
       auth: '/api/auth',
       transactions: '/api/transactions',
       categories: '/api/categories',
+      accounts: '/api/accounts',
       reports: '/api/reports',
     },
   })
@@ -50,6 +52,7 @@ app.get('/health', (_req, res) => {
 // Routes
 app.use('/api/auth', authRoutes)
 app.use('/api/categories', categoriesRoutes)
+app.use('/api/accounts', accountsRoutes)
 app.use('/api/transactions', transactionsRoutes)
 app.use('/api/reports', reportsRoutes)
 

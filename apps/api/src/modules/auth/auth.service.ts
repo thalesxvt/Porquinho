@@ -3,6 +3,7 @@ import { prisma } from '../../lib/prisma'
 import { signToken } from '../../utils/jwt'
 import type { RegisterInput, LoginInput, AuthResponse, UpdateProfileInput } from '@porquinho/types'
 import { CategoryType } from '@prisma/client'
+import { DEFAULT_ACCOUNT } from '../accounts/accounts.service'
 
 const DEFAULT_CATEGORIES: Array<{
   name: string
@@ -53,6 +54,9 @@ export class AuthService {
         userId: user.id,
       })),
     })
+
+    // Conta inicial: todas as transações pertencem a alguma conta.
+    await prisma.account.create({ data: { ...DEFAULT_ACCOUNT, userId: user.id } })
 
     const token = signToken({ userId: user.id, email: user.email })
 

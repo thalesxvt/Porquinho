@@ -34,8 +34,8 @@ function getDateRange(period: Period, referenceDate = new Date()) {
   }
 }
 
-async function getTotals(userId: string, start: Date, end: Date, categoryId?: string) {
-  const where: any = { userId, date: { gte: start, lte: end } }
+async function getTotals(userId: string, accountId: string, start: Date, end: Date, categoryId?: string) {
+  const where: any = { userId, accountId, date: { gte: start, lte: end } }
   if (categoryId) {
     where.categoryId = categoryId
   }
@@ -60,10 +60,10 @@ async function getTotals(userId: string, start: Date, end: Date, categoryId?: st
   return { income, expense, invested, paidByOthers, balance: income - expense - invested }
 }
 
-async function getPriorBalance(userId: string, beforeDate: Date) {
+async function getPriorBalance(userId: string, accountId: string, beforeDate: Date) {
   const result = await prisma.transaction.groupBy({
     by: ['type'],
-    where: { userId, paidByOthers: false, date: { lt: beforeDate } },
+    where: { userId, accountId, paidByOthers: false, date: { lt: beforeDate } },
     _sum: { amountCents: true },
   })
 
@@ -74,13 +74,13 @@ async function getPriorBalance(userId: string, beforeDate: Date) {
 }
 
 export class ReportsService {
-  async getSummary(userId: string, period: Period, referenceDate: Date = new Date()) {
+  async getSummary(userId: string, accountId: string, period: Period, referenceDate: Date = new Date()) {
     const range = getDateRange(period, referenceDate)
 
     const [current, previous, rolloverBalance] = await Promise.all([
-      getTotals(userId, range.start, range.end),
-      getTotals(userId, range.previousStart, range.previousEnd),
-      getPriorBalance(userId, range.start),
+      getTotals(userId, accountId, range.start, range.end),
+      getTotals(userId, accountId, range.previousStart, range.previousEnd),
+      getPriorBalance(userId, accountId, range.start),
     ])
 
     const monthBalance = current.balance
@@ -102,13 +102,14 @@ export class ReportsService {
     }
   }
 
-  async getByCategory(userId: string, period: Period, referenceDate: Date = new Date()) {
+  async getByCategory(userId: string, accountId: string, period: Period, referenceDate: Date = new Date()) {
     const range = getDateRange(period, referenceDate)
 
     const results = await prisma.transaction.groupBy({
       by: ['categoryId', 'type'],
       where: {
         userId,
+        accountId,
         type: 'EXPENSE',
         paidByOthers: false,
         date: { gte: range.start, lte: range.end },
@@ -138,7 +139,7 @@ export class ReportsService {
     }).sort((a, b) => b.total - a.total)
   }
 
-  async getWeekly(userId: string, year: number, month: number) {
+  async getWeekly(userId: string, accountId: string, year: number, month: number) {
     const start = startOfMonth(new Date(year, month - 1))
     const end = endOfMonth(new Date(year, month - 1))
 
@@ -147,7 +148,7 @@ export class ReportsService {
     const results = await Promise.all(
       weeks.map(async (weekStart, index) => {
         const weekEnd = endOfWeek(weekStart, { weekStartsOn: 0 })
-        const totals = await getTotals(userId, weekStart, weekEnd)
+        const totals = await getTotals(userId, accountId, weekStart, weekEnd)
         return {
           week: `Semana ${index + 1}`,
           startDate: weekStart.toISOString(),
@@ -162,9 +163,9 @@ export class ReportsService {
     return results
   }
 
-  async getAvailableMonths(userId: string) {
+  async getAvailableMonths(userId: string, accountId: string) {
     const rows = await prisma.transaction.findMany({
-      where: { userId },
+      where: { userId, accountId },
       select: { date: true },
       distinct: ['date'],
     })
@@ -178,7 +179,7 @@ export class ReportsService {
       .sort((a, b) => b.localeCompare(a)) // mais recente primeiro
   }
 
-  async getMonthly(userId: string, year: number, categoryId?: string) {
+  async getMonthly(userId: string, accountId: string, year: number, categoryId?: string) {
     const start = startOfYear(new Date(year, 0))
     const end = endOfYear(new Date(year, 0))
 
@@ -187,7 +188,7 @@ export class ReportsService {
     const results = await Promise.all(
       months.map(async (monthStart) => {
         const monthEnd = endOfMonth(monthStart)
-        const totals = await getTotals(userId, monthStart, monthEnd, categoryId)
+        const totals = await getTotals(userId, accountId, monthStart, monthEnd, categoryId)
         return {
           month: format(monthStart, 'yyyy-MM'),
           monthLabel: format(monthStart, 'MMM', { locale: ptBR }),

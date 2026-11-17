@@ -29,6 +29,22 @@ model User {
   updatedAt    DateTime      @updatedAt
   transactions Transaction[]
   categories   Category[]
+  accounts     Account[]
+}
+
+// Conta/carteira: dinheiro que não se mistura (ex.: conta principal, VR, outro banco).
+// Cada transação pertence a uma conta; saldos e relatórios são calculados por conta.
+model Account {
+  id           String        @id @default(cuid())
+  name         String
+  color        String
+  userId       String
+  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  transactions Transaction[]
+  createdAt    DateTime      @default(now())
+
+  @@unique([name, userId])
+  @@index([userId])
 }
 
 model Category {
@@ -56,6 +72,10 @@ model Transaction {
   date        DateTime
   categoryId  String
   category    Category        @relation(fields: [categoryId], references: [id])
+  // Opcional só para bases antigas: transações sem conta são movidas para a conta
+  // padrão do usuário na primeira vez que as contas dele são carregadas.
+  accountId   String?
+  account     Account?        @relation(fields: [accountId], references: [id])
   userId      String
   user        User            @relation(fields: [userId], references: [id], onDelete: Cascade)
   createdAt   DateTime        @default(now())
@@ -65,4 +85,5 @@ model Transaction {
   @@index([userId, type])
   @@index([userId, paidByOthers])
   @@index([categoryId])
+  @@index([accountId, date])
 }

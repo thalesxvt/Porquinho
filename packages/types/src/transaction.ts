@@ -9,6 +9,8 @@ export const CreateTransactionSchema = z.object({
   description: z.string().min(1, 'Descrição é obrigatória').max(255),
   date: z.string().datetime(),
   categoryId: z.string().cuid(),
+  // Conta da transação; se omitida, a API usa a conta padrão do usuário.
+  accountId: z.string().cuid().optional(),
   // Só vale para despesas; a API grava false para os outros tipos.
   paidByOthers: z.boolean().optional(),
 })
@@ -28,6 +30,7 @@ export interface Transaction {
   categoryId: string
   categoryName: string
   categoryColor: string
+  accountId: string | null
   createdAt: string
   updatedAt: string
 }

@@ -4,6 +4,7 @@ import { Dashboard } from './pages/Dashboard'
 import { Transactions } from './pages/Transactions'
 import { Reports } from './pages/Reports'
 import { Categories } from './pages/Categories'
+import { Accounts } from './pages/Accounts'
 import { Login } from './pages/Login'
 import { Register } from './pages/Register'
 
@@ -70,6 +71,15 @@ export default function App() {
         element={
           <PrivateRoute>
             <Categories />
+          </PrivateRoute>
+        }
+      />
+
+      <Route
+        path="/accounts"
+        element={
+          <PrivateRoute>
+            <Accounts />
           </PrivateRoute>
         }
       />

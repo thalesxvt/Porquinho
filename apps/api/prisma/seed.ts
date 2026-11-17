@@ -90,18 +90,39 @@ async function main() {
     if (i % 3 === 0) t(25, 'INVESTMENT', 'Reserva diversa', 'Outros', 300)
   })
 
+  // Contas: a principal recebe o salário; o VR só recebe o crédito do benefício.
+  const upsertAccount = (name: string, color: string) =>
+    prisma.account.upsert({
+      where: { name_userId: { name, userId: user.id } },
+      update: {},
+      create: { name, color, userId: user.id },
+    })
+  const principal = await upsertAccount('Principal', '#09090b')
+  const vr = await upsertAccount('VR', '#ea580c')
+
+  const vrDemo: typeof demo = []
+  months.forEach((m, i) => {
+    vrDemo.push({ m, day: 1, type: 'INCOME', desc: 'Crédito VR', cat: 'Outros', reais: 900 })
+    vrDemo.push({ m, day: 9, type: 'EXPENSE', desc: 'Mercado', cat: 'Alimentação', reais: 380 + i * 20 })
+    vrDemo.push({ m, day: 16, type: 'EXPENSE', desc: 'Almoço', cat: 'Alimentação', reais: 210 + i * 15 })
+    vrDemo.push({ m, day: 23, type: 'EXPENSE', desc: 'Padaria', cat: 'Alimentação', reais: 95 })
+  })
+
+  const toRow = (accountId: string) => (d: (typeof demo)[number]) => ({
+    amountCents: Math.round(d.reais * 100),
+    type: d.type,
+    description: encrypt(d.desc),
+    date: new Date(Date.UTC(2026, d.m, d.day, 12)),
+    categoryId: cat(d.cat, d.type === 'INCOME' ? 'INCOME' : d.type === 'INVESTMENT' ? 'INVESTMENT' : 'EXPENSE'),
+    accountId,
+    userId: user.id,
+  })
+
   await prisma.transaction.deleteMany({ where: { userId: user.id } })
   await prisma.transaction.createMany({
-    data: demo.map((d) => ({
-      amountCents: Math.round(d.reais * 100),
-      type: d.type,
-      description: encrypt(d.desc),
-      date: new Date(Date.UTC(2026, d.m, d.day, 12)),
-      categoryId: cat(d.cat, d.type === 'INCOME' ? 'INCOME' : d.type === 'INVESTMENT' ? 'INVESTMENT' : 'EXPENSE'),
-      userId: user.id,
-    })),
+    data: [...demo.map(toRow(principal.id)), ...vrDemo.map(toRow(vr.id))],
   })
-  console.log(`✅ ${demo.length} demo transactions created`)
+  console.log(`✅ ${demo.length + vrDemo.length} demo transactions created (contas Principal e VR)`)
   console.log('🎉 Seed completed!')
 }
 
