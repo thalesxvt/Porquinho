@@ -10,7 +10,7 @@ import { txStyle } from '../../lib/transactionStyle'
 import { useTransactionModalStore } from '../../stores/transactionModal.store'
 
 export function RecentTransactions() {
-  const { data, isLoading } = useTransactions({ limit: 6, page: 1 })
+  const { data, isLoading } = useTransactions({ limit: 6, page: 1, status: 'PAID' })
   const { openModal } = useTransactionModalStore()
   const transactions = data?.data ?? []
 

@@ -1,4 +1,6 @@
 import { PaidByOthersBadge } from '../components/transactions/PaidByOthersBadge'
+import { TransactionStatusBadges } from '../components/transactions/TransactionStatusBadges'
+import { PayButton } from '../components/transactions/PayButton'
 import { useState } from 'react'
 import {
   Plus,
@@ -32,6 +34,8 @@ export function Transactions() {
   const [type, setType] = useState<'' | 'EXPENSE' | 'INCOME' | 'INVESTMENT'>('')
   const [categoryId, setCategoryId] = useState('')
   const [selectedMonth, setSelectedMonth] = useState('')
+  // '' = todas; PENDING = a pagar/receber; OVERDUE = atrasadas; PAID = realizadas
+  const [statusFilter, setStatusFilter] = useState<'' | 'PENDING' | 'OVERDUE' | 'PAID'>('')
   const [deleteTransaction, setDeleteTransaction] = useState<any>(null)
 
   const { openModal } = useTransactionModalStore()
@@ -56,6 +60,8 @@ export function Transactions() {
     categoryId: categoryId || undefined,
     startDate,
     endDate,
+    status: statusFilter === 'PAID' || statusFilter === 'PENDING' ? statusFilter : undefined,
+    overdue: statusFilter === 'OVERDUE' || undefined,
   })
 
   const { data: categories = [] } = useCategories()
@@ -86,13 +92,14 @@ export function Transactions() {
     .filter((t: any) => t.type === 'INVESTMENT')
     .reduce((sum: number, t: any) => sum + t.amountCents, 0)
 
-  const hasActiveFilters = Boolean(search || type || categoryId || selectedMonth)
+  const hasActiveFilters = Boolean(search || type || categoryId || selectedMonth || statusFilter)
 
   const clearFilters = () => {
     setSearch('')
     setType('')
     setCategoryId('')
     setSelectedMonth('')
+    setStatusFilter('')
     setPage(1)
   }
 
@@ -234,6 +241,40 @@ export function Transactions() {
           </div>
         </div>
 
+        {/* Situação: realizadas, a pagar/receber, atrasadas */}
+        <div
+          role="group"
+          aria-label="Filtrar por situação"
+          className="mt-3.5 flex rounded-xl border border-[#DDD7C0] bg-[#F1ECDA] p-1 gap-1 sm:max-w-lg"
+        >
+          {([
+            ['', 'Todas'],
+            ['PAID', 'Realizadas'],
+            ['PENDING', 'A pagar/receber'],
+            ['OVERDUE', 'Atrasadas'],
+          ] as const).map(([value, label]) => (
+            <button
+              key={value || 'ALL'}
+              type="button"
+              aria-pressed={statusFilter === value}
+              onClick={() => {
+                setStatusFilter(value)
+                setPage(1)
+              }}
+              className={cn(
+                'flex-1 rounded-lg py-1.5 text-xs font-bold transition-all cursor-pointer whitespace-nowrap',
+                statusFilter === value
+                  ? value === 'OVERDUE'
+                    ? 'bg-[#C94A4A] text-white shadow-xs'
+                    : 'bg-[#111111] text-[#F1ECDA] shadow-xs'
+                  : 'text-[#5C6D7C] hover:text-[#111111]'
+              )}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+
         {/* Filter Stats Strip */}
         <div className="mt-4 pt-3.5 border-t border-slate-100 flex flex-wrap items-center justify-between gap-3 text-xs text-slate-500">
           <div className="flex flex-wrap items-center gap-3 font-semibold">
@@ -344,6 +385,7 @@ export function Transactions() {
                                   {t.description}
                                 </p>
                                 {t.paidByOthers && <PaidByOthersBadge />}
+                                <TransactionStatusBadges transaction={t} />
                               </div>
                               <span className="text-[11px] text-[#758695] font-medium">
                                 Ref #{t.id.slice(-6)}
@@ -365,7 +407,7 @@ export function Transactions() {
 
                         {/* Date */}
                         <td className="py-4 px-6 whitespace-nowrap text-xs text-[#5C6D7C] font-medium">
-                          {formatDate(t.date)}
+                          {t.status === 'PENDING' ? `Vence ${formatDate(t.date)}` : formatDate(t.date)}
                         </td>
 
                         {/* Amount */}
@@ -383,6 +425,7 @@ export function Transactions() {
                         {/* Actions */}
                         <td className="py-4 px-6 whitespace-nowrap text-right">
                           <div className="inline-flex items-center gap-1 opacity-80 group-hover:opacity-100 transition-opacity">
+                            {t.status === 'PENDING' && <PayButton transaction={t} className="mr-1" />}
                             <button
                               onClick={() => openModal(t)}
                               className="flex h-8 w-8 items-center justify-center rounded-lg text-[#758695] hover:text-[#111111] hover:bg-[#EFE9D5] transition-colors cursor-pointer"
@@ -430,9 +473,10 @@ export function Transactions() {
                               {t.description}
                             </p>
                             {t.paidByOthers && <PaidByOthersBadge />}
+                            <TransactionStatusBadges transaction={t} />
                           </div>
                           <p className="text-[11px] text-[#758695] font-medium">
-                            {formatDateRelative(t.date)}
+                            {t.status === 'PENDING' ? `Vence ${formatDate(t.date)}` : formatDateRelative(t.date)}
                           </p>
                         </div>
                       </div>
@@ -452,6 +496,7 @@ export function Transactions() {
                         {t.categoryName}
                       </Badge>
                       <div className="flex items-center gap-1.5">
+                        {t.status === 'PENDING' && <PayButton transaction={t} />}
                         <button
                           onClick={() => openModal(t)}
                           className="flex h-8 px-2.5 items-center gap-1 text-xs font-bold text-[#111111] hover:text-black bg-[#EFE9D5] active:bg-[#E5DDC2] rounded-lg cursor-pointer"
