@@ -6,6 +6,11 @@ export function errorHandler(
   res: Response,
   _next: NextFunction
 ): void {
+  if (err.message === 'CORS_NOT_ALLOWED') {
+    res.status(403).json({ error: 'Origem não permitida' })
+    return
+  }
+
   console.error(`[Error] ${err.message}`, err.stack)
 
   if (err.name === 'ZodError' || Array.isArray(err.errors)) {

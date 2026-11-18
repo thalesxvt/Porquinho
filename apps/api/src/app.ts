@@ -11,17 +11,30 @@ import { errorHandler } from './middleware/error.middleware'
 
 export const app = express()
 
+// Atrás do proxy do host, o IP real do cliente vem em X-Forwarded-For
+// (necessário para o limite de tentativas de login funcionar por IP).
+app.set('trust proxy', 1)
+
+const normalizeOrigin = (o: string) => o.trim().replace(/\/$/, '')
+
+// Origens aceitas em produção: FRONTEND_URL + CORS_EXTRA_ORIGINS (separadas por vírgula).
+const allowedOrigins = new Set(
+  [process.env.FRONTEND_URL, ...(process.env.CORS_EXTRA_ORIGINS ?? '').split(',')]
+    .filter((o): o is string => Boolean(o && o.trim()))
+    .map(normalizeOrigin)
+)
+
 app.use(helmet())
 app.use(cors({
   origin: (origin, callback) => {
-    if (!origin || process.env.NODE_ENV !== 'production' || !process.env.FRONTEND_URL) {
+    // Sem Origin (curl, apps nativos) ou fora de produção: libera.
+    if (!origin || process.env.NODE_ENV !== 'production' || allowedOrigins.size === 0) {
       return callback(null, true)
     }
-    const target = process.env.FRONTEND_URL.replace(/\/$/, '')
-    if (origin.replace(/\/$/, '') === target || origin.endsWith('.vercel.app')) {
+    if (allowedOrigins.has(normalizeOrigin(origin))) {
       return callback(null, true)
     }
-    return callback(null, true)
+    return callback(new Error('CORS_NOT_ALLOWED'))
   },
   credentials: true,
 }))

@@ -10,6 +10,8 @@ const envSchema = z.object({
   PORT: z.coerce.number().default(3001),
   NODE_ENV: z.enum(['development', 'production', 'test']).default('development'),
   FRONTEND_URL: z.string().optional(),
+  // Origens extras aceitas pelo CORS em produção, separadas por vírgula (ex.: previews da Vercel).
+  CORS_EXTRA_ORIGINS: z.string().optional(),
   // Chave de criptografia AES-256 (64 chars hexadecimais = 32 bytes)
   ENCRYPTION_KEY: z.string().length(64, 'ENCRYPTION_KEY deve ter exatamente 64 caracteres hexadecimais (32 bytes).'),
 })
