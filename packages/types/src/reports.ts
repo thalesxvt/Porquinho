@@ -43,3 +43,24 @@ export interface MonthlySummary {
   totalInvested: number
   balance: number
 }
+
+export interface UpcomingSummary {
+  overdue: import('./transaction').Transaction[]   // pendentes com vencimento já passado
+  upcoming: import('./transaction').Transaction[]  // pendentes que vencem nos próximos N dias
+  totalToPay: number        // centavos a pagar (despesas + investimentos, vencidas + próximas)
+  totalToReceive: number    // centavos a receber (receitas, vencidas + próximas)
+}
+
+export interface ForecastMonth {
+  month: string             // '2026-12'
+  monthLabel: string        // 'dez'
+  expectedIncome: number    // centavos pendentes a receber no mês
+  expectedExpense: number   // centavos pendentes a pagar no mês (sem pagos por terceiros)
+  expectedInvested: number  // centavos pendentes de investimento no mês
+  endingBalance: number     // saldo previsto no fim do mês
+}
+
+export interface Forecast {
+  currentBalance: number    // saldo realizado hoje (só PAID)
+  months: ForecastMonth[]
+}

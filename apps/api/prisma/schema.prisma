@@ -13,6 +13,17 @@ enum TransactionType {
   INVESTMENT
 }
 
+// PAID: já saiu/entrou no caixa. PENDING: conta a pagar/receber (date = vencimento).
+enum TransactionStatus {
+  PENDING
+  PAID
+}
+
+enum SeriesKind {
+  INSTALLMENT
+  RECURRING
+}
+
 enum CategoryType {
   EXPENSE
   INCOME
@@ -21,69 +32,109 @@ enum CategoryType {
 }
 
 model User {
-  id           String        @id @default(cuid())
-  email        String        @unique
+  id           String              @id @default(cuid())
+  email        String              @unique
   passwordHash String
   name         String
-  createdAt    DateTime      @default(now())
-  updatedAt    DateTime      @updatedAt
+  createdAt    DateTime            @default(now())
+  updatedAt    DateTime            @updatedAt
   transactions Transaction[]
   categories   Category[]
   accounts     Account[]
+  series       TransactionSeries[]
 }
 
 // Conta/carteira: dinheiro que não se mistura (ex.: conta principal, VR, outro banco).
 // Cada transação pertence a uma conta; saldos e relatórios são calculados por conta.
 model Account {
-  id           String        @id @default(cuid())
+  id           String              @id @default(cuid())
   name         String
   color        String
   userId       String
-  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user         User                @relation(fields: [userId], references: [id], onDelete: Cascade)
   transactions Transaction[]
-  createdAt    DateTime      @default(now())
+  series       TransactionSeries[]
+  createdAt    DateTime            @default(now())
 
   @@unique([name, userId])
   @@index([userId])
 }
 
 model Category {
-  id           String        @id @default(cuid())
+  id           String              @id @default(cuid())
   name         String
   type         CategoryType
   color        String
   icon         String?
-  isDefault    Boolean       @default(false)
+  isDefault    Boolean             @default(false)
   userId       String
-  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user         User                @relation(fields: [userId], references: [id], onDelete: Cascade)
   transactions Transaction[]
-  createdAt    DateTime      @default(now())
+  series       TransactionSeries[]
+  createdAt    DateTime            @default(now())
 
   @@unique([name, type, userId])
 }
 
 model Transaction {
-  id          String          @id @default(cuid())
-  amountCents Int
-  type        TransactionType
+  id                String             @id @default(cuid())
+  amountCents       Int
+  type              TransactionType
   // Despesa paga por terceiros (ex.: cartão dos pais): registrada, mas não sai do saldo.
-  paidByOthers Boolean        @default(false)
-  description String
-  date        DateTime
-  categoryId  String
-  category    Category        @relation(fields: [categoryId], references: [id])
+  paidByOthers      Boolean            @default(false)
+  description       String
+  // PAID: data do pagamento. PENDING: data de vencimento.
+  date              DateTime
+  status            TransactionStatus  @default(PAID)
+  // Ocorrência de uma série (parcelada ou recorrente); null em lançamentos avulsos.
+  seriesId          String?
+  series            TransactionSeries? @relation(fields: [seriesId], references: [id], onDelete: SetNull)
+  installmentNumber Int?
+  categoryId        String
+  category          Category           @relation(fields: [categoryId], references: [id])
   // Opcional só para bases antigas: transações sem conta são movidas para a conta
   // padrão do usuário na primeira vez que as contas dele são carregadas.
-  accountId   String?
-  account     Account?        @relation(fields: [accountId], references: [id])
-  userId      String
-  user        User            @relation(fields: [userId], references: [id], onDelete: Cascade)
-  createdAt   DateTime        @default(now())
-  updatedAt   DateTime        @updatedAt
+  accountId         String?
+  account           Account?           @relation(fields: [accountId], references: [id])
+  userId            String
+  user              User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
 
   @@index([userId, date])
   @@index([userId, type])
   @@index([userId, paidByOthers])
+  @@index([userId, status, date])
   @@index([categoryId])
   @@index([accountId, date])
+  @@index([seriesId, date])
+}
+
+// Molde de uma série mensal. As ocorrências são Transactions de verdade
+// (PENDING até serem pagas), para poderem ser editadas/pagas uma a uma.
+model TransactionSeries {
+  id               String          @id @default(cuid())
+  kind             SeriesKind
+  // Só INSTALLMENT: número total de parcelas.
+  installmentCount Int?
+  // Dia do mês das ocorrências (meses mais curtos usam o último dia).
+  dayOfMonth       Int
+  // Data da última ocorrência já gerada (RECURRING é estendida aos poucos).
+  generatedUntil   DateTime
+  active           Boolean         @default(true)
+  amountCents      Int
+  type             TransactionType
+  paidByOthers     Boolean         @default(false)
+  description      String // criptografado, como em Transaction
+  categoryId       String
+  category         Category        @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  accountId        String
+  account          Account         @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  userId           String
+  user             User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  transactions     Transaction[]
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
+
+  @@index([userId, kind, active])
 }

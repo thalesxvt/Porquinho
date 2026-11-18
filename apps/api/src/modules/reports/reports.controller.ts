@@ -74,4 +74,20 @@ export class ReportsController {
     const data = await service.getMonthly(req.userId!, accountId, year, categoryId)
     res.json({ data })
   }
+
+  async getUpcoming(req: AuthRequest, res: Response): Promise<void> {
+    const accountId = await this.getAccountId(req, res)
+    if (!accountId) return
+    const days = Math.min(Math.max(parseInt(req.query.days as string) || 30, 1), 365)
+    const data = await service.getUpcoming(req.userId!, accountId, days)
+    res.json({ data })
+  }
+
+  async getForecast(req: AuthRequest, res: Response): Promise<void> {
+    const accountId = await this.getAccountId(req, res)
+    if (!accountId) return
+    const months = Math.min(Math.max(parseInt(req.query.months as string) || 6, 1), 24)
+    const data = await service.getForecast(req.userId!, accountId, months)
+    res.json({ data })
+  }
 }

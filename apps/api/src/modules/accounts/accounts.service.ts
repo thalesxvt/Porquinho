@@ -47,7 +47,8 @@ export class AccountsService {
       prisma.account.findMany({ where: { userId }, orderBy: { createdAt: 'asc' } }),
       prisma.transaction.groupBy({
         by: ['accountId', 'type'],
-        where: { userId, paidByOthers: false },
+        // Saldo = só o que já foi pago/recebido; pendentes não entram.
+        where: { userId, paidByOthers: false, status: 'PAID' },
         _sum: { amountCents: true },
       }),
       prisma.transaction.groupBy({
