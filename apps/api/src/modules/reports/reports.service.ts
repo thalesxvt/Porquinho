@@ -5,6 +5,9 @@ import {
   eachWeekOfInterval, eachMonthOfInterval, format
 } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
+import { dayBounds, projectBalances, todayAtNoon, type MonthFlow } from '../transactions/series'
+import { extendRecurringSeries } from '../transactions/series.service'
+import { mapTransaction, transactionInclude } from '../transactions/transactions.service'
 
 type Period = 'week' | 'month' | 'year'
 
@@ -35,7 +38,8 @@ function getDateRange(period: Period, referenceDate = new Date()) {
 }
 
 async function getTotals(userId: string, accountId: string, start: Date, end: Date, categoryId?: string) {
-  const where: any = { userId, accountId, date: { gte: start, lte: end } }
+  // Relatórios mostram o realizado: pendentes (contas a pagar/receber) ficam fora.
+  const where: any = { userId, accountId, status: 'PAID', date: { gte: start, lte: end } }
   if (categoryId) {
     where.categoryId = categoryId
   }
@@ -60,10 +64,17 @@ async function getTotals(userId: string, accountId: string, start: Date, end: Da
   return { income, expense, invested, paidByOthers, balance: income - expense - invested }
 }
 
-async function getPriorBalance(userId: string, accountId: string, beforeDate: Date) {
+/** Saldo realizado (só PAID) antes de `beforeDate`, ou de todo o histórico se omitida. */
+async function getPriorBalance(userId: string, accountId: string, beforeDate?: Date) {
   const result = await prisma.transaction.groupBy({
     by: ['type'],
-    where: { userId, accountId, paidByOthers: false, date: { lt: beforeDate } },
+    where: {
+      userId,
+      accountId,
+      paidByOthers: false,
+      status: 'PAID',
+      ...(beforeDate && { date: { lt: beforeDate } }),
+    },
     _sum: { amountCents: true },
   })
 
@@ -112,6 +123,7 @@ export class ReportsService {
         accountId,
         type: 'EXPENSE',
         paidByOthers: false,
+        status: 'PAID',
         date: { gte: range.start, lte: range.end },
       },
       _sum: { amountCents: true },
@@ -165,7 +177,7 @@ export class ReportsService {
 
   async getAvailableMonths(userId: string, accountId: string) {
     const rows = await prisma.transaction.findMany({
-      where: { userId, accountId },
+      where: { userId, accountId, status: 'PAID' },
       select: { date: true },
       distinct: ['date'],
     })
@@ -201,5 +213,92 @@ export class ReportsService {
     )
 
     return results
+  }
+
+  /** Pendentes vencidas + as que vencem nos próximos `days` dias, com totais. */
+  async getUpcoming(userId: string, accountId: string, days: number) {
+    await extendRecurringSeries(userId)
+
+    const today = dayBounds(todayAtNoon())
+    const limit = new Date(today.end.getTime() + days * 24 * 60 * 60 * 1000)
+
+    const rows = await prisma.transaction.findMany({
+      where: { userId, accountId, status: 'PENDING', date: { lt: limit } },
+      include: transactionInclude,
+      orderBy: { date: 'asc' },
+    })
+    const items = rows.map(mapTransaction)
+
+    let totalToPay = 0
+    let totalToReceive = 0
+    for (const t of items) {
+      // Pagas por terceiros aparecem na lista, mas não pesam no seu bolso.
+      if (t.paidByOthers) continue
+      if (t.type === 'INCOME') totalToReceive += t.amountCents
+      else totalToPay += t.amountCents
+    }
+
+    const startMs = today.start.getTime()
+    return {
+      overdue: items.filter((t) => new Date(t.date).getTime() < startMs),
+      upcoming: items.filter((t) => new Date(t.date).getTime() >= startMs),
+      totalToPay,
+      totalToReceive,
+    }
+  }
+
+  /**
+   * Previsão de saldo: parte do saldo realizado de hoje e soma, mês a mês,
+   * as pendentes. Pendentes atrasadas entram no mês atual.
+   */
+  async getForecast(userId: string, accountId: string, months: number) {
+    await extendRecurringSeries(userId)
+
+    const today = todayAtNoon()
+    const year = today.getUTCFullYear()
+    const month = today.getUTCMonth()
+    // Início de cada mês (UTC) do atual até atual + months; o último é só o limite.
+    const bounds = Array.from({ length: months + 1 }, (_, i) => new Date(Date.UTC(year, month + i, 1)))
+
+    const [currentBalance, pending] = await Promise.all([
+      getPriorBalance(userId, accountId),
+      prisma.transaction.findMany({
+        where: {
+          userId,
+          accountId,
+          status: 'PENDING',
+          paidByOthers: false,
+          date: { lt: bounds[months] },
+        },
+        select: { amountCents: true, type: true, date: true },
+      }),
+    ])
+
+    const flows: MonthFlow[] = Array.from({ length: months }, () => ({ income: 0, expense: 0, invested: 0 }))
+    for (const t of pending) {
+      // Atrasadas (antes do mês atual) caem no mês atual: ainda vão sair do caixa.
+      const i = Math.max(0, bounds.findIndex((b, k) => k < months && t.date < bounds[k + 1]))
+      if (t.type === 'INCOME') flows[i].income += t.amountCents
+      else if (t.type === 'EXPENSE') flows[i].expense += t.amountCents
+      else flows[i].invested += t.amountCents
+    }
+
+    const balances = projectBalances(currentBalance, flows)
+
+    return {
+      currentBalance,
+      months: flows.map((f, i) => {
+        // Dia 15 ao meio-dia evita que o fuso do servidor troque o mês do rótulo.
+        const labelDate = new Date(Date.UTC(year, month + i, 15, 12))
+        return {
+          month: format(labelDate, 'yyyy-MM'),
+          monthLabel: format(labelDate, 'MMM', { locale: ptBR }),
+          expectedIncome: f.income,
+          expectedExpense: f.expense,
+          expectedInvested: f.invested,
+          endingBalance: balances[i],
+        }
+      }),
+    }
   }
 }

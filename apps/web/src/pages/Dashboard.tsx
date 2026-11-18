@@ -15,6 +15,8 @@ import { MonthSelector } from '../components/dashboard/MonthSelector'
 import { MonthTransactionsTable } from '../components/dashboard/MonthTransactionsTable'
 import { KPICard } from '../components/dashboard/KPICard'
 import { RecentTransactions } from '../components/dashboard/RecentTransactions'
+import { UpcomingCard } from '../components/dashboard/UpcomingCard'
+import { ForecastCard } from '../components/dashboard/ForecastCard'
 import { Button } from '../components/ui/Button'
 import { Card, CardHeader, CardTitle, CardDescription } from '../components/ui/Card'
 import { KPICardSkeleton, ChartSkeleton } from '../components/ui/Skeleton'
@@ -161,6 +163,12 @@ export function Dashboard() {
             />
           </>
         ) : null}
+      </div>
+
+      {/* Contas a pagar/receber e previsão de saldo */}
+      <div className="mb-6 grid grid-cols-1 gap-5 lg:grid-cols-3">
+        <ForecastCard className="lg:col-span-2" />
+        <UpcomingCard />
       </div>
 
       {/* Charts Row */}

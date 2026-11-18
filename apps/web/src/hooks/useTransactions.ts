@@ -10,7 +10,13 @@ interface TransactionFilters {
   search?: string
   startDate?: string
   endDate?: string
+  status?: 'PENDING' | 'PAID'
+  /** Só pendentes com vencimento já passado. */
+  overdue?: boolean
 }
+
+/** Em séries: 'one' mexe só nesta ocorrência; 'following' também nas pendentes seguintes. */
+export type SeriesScope = 'one' | 'following'
 
 /** Lista as transações da conta ativa. */
 export function useTransactions(filters: TransactionFilters = {}) {
@@ -55,8 +61,8 @@ export function useCreateTransaction() {
 export function useUpdateTransaction() {
   const invalidate = useInvalidateAfterChange()
   return useMutation({
-    mutationFn: async ({ id, ...input }: any) => {
-      const { data } = await api.put(`/transactions/${id}`, input)
+    mutationFn: async ({ id, scope = 'one', ...input }: any & { scope?: SeriesScope }) => {
+      const { data } = await api.put(`/transactions/${id}?scope=${scope}`, input)
       return data.data
     },
     onSuccess: invalidate,
@@ -66,8 +72,20 @@ export function useUpdateTransaction() {
 export function useDeleteTransaction() {
   const invalidate = useInvalidateAfterChange()
   return useMutation({
-    mutationFn: async (id: string) => {
-      await api.delete(`/transactions/${id}`)
+    mutationFn: async ({ id, scope = 'one' }: { id: string; scope?: SeriesScope }) => {
+      await api.delete(`/transactions/${id}?scope=${scope}`)
+    },
+    onSuccess: invalidate,
+  })
+}
+
+/** Marca uma pendente como paga/recebida (data padrão: hoje). */
+export function usePayTransaction() {
+  const invalidate = useInvalidateAfterChange()
+  return useMutation({
+    mutationFn: async ({ id, date }: { id: string; date?: string }) => {
+      const { data } = await api.patch(`/transactions/${id}/pay`, date ? { date } : {})
+      return data.data
     },
     onSuccess: invalidate,
   })

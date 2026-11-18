@@ -1,3 +1,4 @@
+import { useEffect, useRef } from 'react'
 import { useForm, Controller } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
@@ -7,8 +8,9 @@ import { Input } from '../ui/Input'
 import { Select } from '../ui/Select'
 import { useCategories } from '../../hooks/useCategories'
 import { useActiveAccount } from '../../hooks/useAccounts'
-import { toCents, centsToFloat } from '../../lib/formatters'
-import { ArrowDownLeft, ArrowUpRight, TrendingUp, DollarSign, Calendar, FileText } from 'lucide-react'
+import { toCents, centsToFloat, formatCurrency } from '../../lib/formatters'
+import { cn } from '../../lib/utils'
+import { ArrowDownLeft, ArrowUpRight, TrendingUp, DollarSign, Calendar, FileText, Hash } from 'lucide-react'
 
 const schema = z.object({
   description: z.string().min(1, 'Descrição é obrigatória').max(255),
@@ -25,6 +27,16 @@ const schema = z.object({
   accountId: z.string(),
   date: z.string().min(1, 'Data é obrigatória'),
   paidByOthers: z.boolean(),
+  status: z.enum(['PAID', 'PENDING']),
+  // Só na criação: NONE = avulsa, INSTALLMENT = parcelar o total, RECURRING = todo mês.
+  repeatKind: z.enum(['NONE', 'INSTALLMENT', 'RECURRING']),
+  installments: z.string(),
+}).superRefine((data, ctx) => {
+  if (data.repeatKind !== 'INSTALLMENT') return
+  const n = Number(data.installments)
+  if (!Number.isInteger(n) || n < 2 || n > 120) {
+    ctx.addIssue({ code: 'custom', path: ['installments'], message: 'Entre 2 e 120 parcelas' })
+  }
 })
 
 type FormData = z.infer<typeof schema>
@@ -46,12 +58,15 @@ export function TransactionForm({
   const { accounts, accountId: activeAccountId } = useActiveAccount()
   // Edição mantém a conta da transação; criação usa a conta ativa no seletor.
   const initialAccountId = defaultValues?.accountId ?? activeAccountId ?? ''
+  // O Dashboard abre o modal só com uma data sugerida: isso ainda é uma criação.
+  const isEditing = Boolean(defaultValues?.id)
 
   const {
     register,
     handleSubmit,
     watch,
     control,
+    setValue,
     formState: { errors },
   } = useForm<FormData>({
     resolver: zodResolver(schema),
@@ -64,6 +79,9 @@ export function TransactionForm({
           accountId: initialAccountId,
           date: format(new Date(defaultValues.date), 'yyyy-MM-dd'),
           paidByOthers: defaultValues.paidByOthers ?? false,
+          status: defaultValues.status ?? 'PAID',
+          repeatKind: 'NONE',
+          installments: '2',
         }
       : {
           type: 'EXPENSE',
@@ -73,10 +91,41 @@ export function TransactionForm({
           categoryId: '',
           accountId: initialAccountId,
           paidByOthers: false,
+          status: 'PAID',
+          repeatKind: 'NONE',
+          installments: '2',
         },
   })
 
   const selectedType = watch('type')
+  const status = watch('status')
+  const date = watch('date')
+  const repeatKind = watch('repeatKind')
+  const amount = watch('amount')
+  const installments = watch('installments')
+
+  // Data futura sugere "A pagar" — até a pessoa escolher a situação manualmente.
+  const statusTouched = useRef(isEditing)
+  useEffect(() => {
+    if (statusTouched.current || !date) return
+    setValue('status', date > format(new Date(), 'yyyy-MM-dd') ? 'PENDING' : 'PAID')
+  }, [date, setValue])
+
+  const isIncome = selectedType === 'INCOME'
+  const paidLabel = isIncome ? 'Recebido' : 'Pago'
+  const pendingLabel = isIncome ? 'A receber' : 'A pagar'
+
+  // Prévia das parcelas, com o resto na primeira (igual à API).
+  const installmentPreview = (() => {
+    const n = Number(installments)
+    const cents = amount ? toCents(amount) : 0
+    if (repeatKind !== 'INSTALLMENT' || !Number.isInteger(n) || n < 2 || n > 120 || cents < n) return null
+    const base = Math.floor(cents / n)
+    const first = base + (cents - base * n)
+    return first === base
+      ? `${n}x de ${formatCurrency(base)}`
+      : `1x de ${formatCurrency(first)} + ${n - 1}x de ${formatCurrency(base)}`
+  })()
 
   const filteredCategories = categories.filter(
     (c) => c.type === selectedType || c.type === 'BOTH'
@@ -91,6 +140,11 @@ export function TransactionForm({
       accountId: data.accountId || undefined,
       date: new Date(data.date + 'T12:00:00.000Z').toISOString(),
       paidByOthers: data.type === 'EXPENSE' && data.paidByOthers,
+      status: data.status,
+      ...(!isEditing && data.repeatKind === 'INSTALLMENT' && {
+        repeat: { kind: 'INSTALLMENT', count: Number(data.installments) },
+      }),
+      ...(!isEditing && data.repeatKind === 'RECURRING' && { repeat: { kind: 'RECURRING' } }),
     })
   }
 
@@ -157,7 +211,7 @@ export function TransactionForm({
       {/* Amount & Date in 2 columns on sm+ */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
         <Input
-          label="Valor (R$)"
+          label={repeatKind === 'INSTALLMENT' ? 'Valor total (R$)' : 'Valor (R$)'}
           placeholder="0,00"
           type="text"
           inputMode="decimal"
@@ -168,13 +222,106 @@ export function TransactionForm({
         />
 
         <Input
-          label="Data"
+          label={status === 'PENDING' ? 'Vencimento' : 'Data'}
           type="date"
           leftIcon={<Calendar size={16} />}
           error={errors.date?.message}
           {...register('date')}
         />
       </div>
+
+      {/* Situação: já saiu/entrou no saldo, ou é uma conta a pagar/receber */}
+      <div>
+        <label className="mb-1.5 block text-xs font-bold text-slate-700">Situação</label>
+        <Controller
+          name="status"
+          control={control}
+          render={({ field }) => (
+            <div className="grid grid-cols-2 gap-1 rounded-xl border border-[#DDD7C0] bg-[#F1ECDA] p-1">
+              {([['PAID', paidLabel], ['PENDING', pendingLabel]] as const).map(([value, text]) => (
+                <button
+                  key={value}
+                  type="button"
+                  aria-pressed={field.value === value}
+                  onClick={() => {
+                    statusTouched.current = true
+                    field.onChange(value)
+                  }}
+                  className={cn(
+                    'rounded-lg py-2 text-xs font-bold transition-all cursor-pointer',
+                    field.value === value
+                      ? 'bg-[#111111] text-[#F1ECDA] shadow-sm'
+                      : 'text-[#5C6D7C] hover:text-[#111111] hover:bg-[#FAF8F2]/60'
+                  )}
+                >
+                  {text}
+                </button>
+              ))}
+            </div>
+          )}
+        />
+        {status === 'PENDING' && (
+          <p className="mt-1.5 text-[11px] text-[#758695]">
+            Só entra no saldo quando você marcar como {isIncome ? 'recebido' : 'pago'}.
+          </p>
+        )}
+      </div>
+
+      {/* Repetição: só ao criar */}
+      {!isEditing && (
+        <div>
+          <label className="mb-1.5 block text-xs font-bold text-slate-700">Repetir</label>
+          <Controller
+            name="repeatKind"
+            control={control}
+            render={({ field }) => (
+              <div className="grid grid-cols-3 gap-1 rounded-xl border border-[#DDD7C0] bg-[#F1ECDA] p-1">
+                {([['NONE', 'Não'], ['INSTALLMENT', 'Parcelar'], ['RECURRING', 'Todo mês']] as const).map(
+                  ([value, text]) => (
+                    <button
+                      key={value}
+                      type="button"
+                      aria-pressed={field.value === value}
+                      onClick={() => field.onChange(value)}
+                      className={cn(
+                        'rounded-lg py-2 text-xs font-bold transition-all cursor-pointer',
+                        field.value === value
+                          ? 'bg-[#111111] text-[#F1ECDA] shadow-sm'
+                          : 'text-[#5C6D7C] hover:text-[#111111] hover:bg-[#FAF8F2]/60'
+                      )}
+                    >
+                      {text}
+                    </button>
+                  )
+                )}
+              </div>
+            )}
+          />
+          {repeatKind === 'INSTALLMENT' && (
+            <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-3.5 items-start">
+              <Input
+                label="Número de parcelas"
+                type="text"
+                inputMode="numeric"
+                className="tabular-nums font-semibold"
+                leftIcon={<Hash size={16} />}
+                error={errors.installments?.message}
+                {...register('installments')}
+              />
+              <p className="text-xs text-[#5C6D7C] sm:pt-8 tabular-nums font-semibold">
+                {installmentPreview ?? 'Informe o valor total'}
+              </p>
+            </div>
+          )}
+          {repeatKind !== 'NONE' && (
+            <p className="mt-1.5 text-[11px] text-[#758695]">
+              {repeatKind === 'INSTALLMENT'
+                ? 'Uma parcela por mês. A partir da 2ª, ficam a pagar até você marcar.'
+                : 'Lança os próximos 12 meses como a pagar e continua gerando sozinho.'}
+            </p>
+          )}
+        </div>
+      )}
 
       {/* Category */}
       <Select
@@ -227,7 +374,7 @@ export function TransactionForm({
           isLoading={isLoading}
           className="w-full sm:w-auto"
         >
-          {defaultValues ? 'Salvar alterações' : 'Registrar transação'}
+          {isEditing ? 'Salvar alterações' : 'Registrar transação'}
         </Button>
       </div>
     </form>

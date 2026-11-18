@@ -1,6 +1,7 @@
 import { useQuery, type UseQueryResult } from '@tanstack/react-query'
 import { api } from '../lib/api'
 import { useActiveAccount } from './useAccounts'
+import type { Forecast, UpcomingSummary } from '@porquinho/types'
 
 export type Period = 'week' | 'month' | 'year'
 
@@ -48,6 +49,22 @@ export function useCategoryReport(period: Period, params?: ReportDateParams) {
     sp.set('period', period)
     setDateParams(sp, params)
     return `/reports/by-category?${sp.toString()}`
+  })
+}
+
+/** Pendentes vencidas + as que vencem nos próximos `days` dias. */
+export function useUpcoming(days = 30) {
+  return useAccountQuery<UpcomingSummary>(['upcoming', days], (sp) => {
+    sp.set('days', String(days))
+    return `/reports/upcoming?${sp.toString()}`
+  })
+}
+
+/** Saldo previsto para os próximos `months` meses, somando as pendentes. */
+export function useForecast(months = 6) {
+  return useAccountQuery<Forecast>(['forecast', months], (sp) => {
+    sp.set('months', String(months))
+    return `/reports/forecast?${sp.toString()}`
   })
 }
 

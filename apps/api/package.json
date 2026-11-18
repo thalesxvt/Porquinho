@@ -12,7 +12,8 @@
     "db:seed": "ts-node prisma/seed.ts",
     "db:studio": "prisma studio",
     "db:encrypt": "ts-node prisma/migrate-encrypt.ts",
-    "db:investments": "ts-node prisma/migrate-investments.ts"
+    "db:investments": "ts-node prisma/migrate-investments.ts",
+    "test": "vitest run"
   },
   "dependencies": {
     "@porquinho/types": "*",
@@ -28,6 +29,7 @@
     "dotenv": "^16.4.1",
     "express": "^4.18.2",
     "express-async-errors": "^3.1.1",
+    "express-rate-limit": "^7.5.1",
     "helmet": "^7.1.0",
     "jsonwebtoken": "^9.0.2",
     "prisma": "^5.9.1",
@@ -35,6 +37,7 @@
     "zod": "^3.22.4"
   },
   "devDependencies": {
-    "ts-node-dev": "^2.0.0"
+    "ts-node-dev": "^2.0.0",
+    "vitest": "^2.1.9"
   }
 }

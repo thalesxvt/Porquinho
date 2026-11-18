@@ -1,4 +1,6 @@
 import { PaidByOthersBadge } from '../transactions/PaidByOthersBadge'
+import { TransactionStatusBadges } from '../transactions/TransactionStatusBadges'
+import { PayButton } from '../transactions/PayButton'
 import { useState } from 'react'
 import {
   Pencil,
@@ -292,6 +294,7 @@ export function MonthTransactionsTable({ selectedDate }: MonthTransactionsTableP
                               {t.description}
                             </span>
                             {t.paidByOthers && <PaidByOthersBadge />}
+                            <TransactionStatusBadges transaction={t} />
                           </div>
                         </td>
 
@@ -308,7 +311,7 @@ export function MonthTransactionsTable({ selectedDate }: MonthTransactionsTableP
 
                         {/* Date */}
                         <td className="py-3.5 px-6 whitespace-nowrap text-xs text-[#5C6D7C] font-medium">
-                          {formatDate(t.date)}
+                          {t.status === 'PENDING' ? `Vence ${formatDate(t.date)}` : formatDate(t.date)}
                         </td>
 
                         {/* Amount */}
@@ -326,6 +329,7 @@ export function MonthTransactionsTable({ selectedDate }: MonthTransactionsTableP
                         {/* Action buttons (Edit & Delete) */}
                         <td className="py-3.5 px-6 whitespace-nowrap text-right">
                           <div className="inline-flex items-center gap-1">
+                            {t.status === 'PENDING' && <PayButton transaction={t} className="mr-1" />}
                             <button
                               onClick={() => openModal(t)}
                               className="flex h-8 w-8 items-center justify-center rounded-lg text-[#758695] hover:text-[#111111] hover:bg-[#EFE9D5] transition-colors cursor-pointer"
@@ -373,9 +377,10 @@ export function MonthTransactionsTable({ selectedDate }: MonthTransactionsTableP
                               {t.description}
                             </p>
                             {t.paidByOthers && <PaidByOthersBadge />}
+                            <TransactionStatusBadges transaction={t} />
                           </div>
                           <p className="text-[11px] text-[#758695] font-medium">
-                            {formatDate(t.date)}
+                            {t.status === 'PENDING' ? `Vence ${formatDate(t.date)}` : formatDate(t.date)}
                           </p>
                         </div>
                       </div>
@@ -395,6 +400,7 @@ export function MonthTransactionsTable({ selectedDate }: MonthTransactionsTableP
                         {t.categoryName}
                       </Badge>
                       <div className="flex items-center gap-1.5">
+                        {t.status === 'PENDING' && <PayButton transaction={t} />}
                         <button
                           onClick={() => openModal(t)}
                           className="flex h-8 px-2.5 items-center gap-1 text-xs font-bold text-[#111111] hover:text-black bg-[#EFE9D5] active:bg-[#E5DDC2] rounded-lg cursor-pointer touch-manipulation"

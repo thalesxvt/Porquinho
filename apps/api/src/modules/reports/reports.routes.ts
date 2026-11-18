@@ -12,5 +12,7 @@ router.get('/by-category', (req, res) => controller.getByCategory(req as any, re
 router.get('/weekly', (req, res) => controller.getWeekly(req as any, res))
 router.get('/available-months', (req, res) => controller.getAvailableMonths(req as any, res))
 router.get('/monthly', (req, res) => controller.getMonthly(req as any, res))
+router.get('/upcoming', (req, res) => controller.getUpcoming(req as any, res))
+router.get('/forecast', (req, res) => controller.getForecast(req as any, res))
 
 export { router as reportsRoutes }

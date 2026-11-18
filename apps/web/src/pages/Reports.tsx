@@ -15,6 +15,7 @@ import {
 } from '../hooks/useReports'
 import { formatCurrency } from '../lib/formatters'
 import { KPICard } from '../components/dashboard/KPICard'
+import { ForecastCard } from '../components/dashboard/ForecastCard'
 import {
   TrendingUp,
   TrendingDown,
@@ -180,6 +181,9 @@ export function Reports() {
           </>
         ) : null}
       </div>
+
+      {/* Previsão de saldo para os próximos 12 meses, com tabela mês a mês */}
+      <ForecastCard months={12} showTable className="mb-6" />
 
       {/* Main Chart Section: Monthly Cash Flow */}
       <Card className="mb-6 overflow-hidden">
