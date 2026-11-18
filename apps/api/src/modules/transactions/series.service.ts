@@ -2,7 +2,6 @@ import { prisma } from '../../lib/prisma'
 import {
   RECURRING_HORIZON_MONTHS,
   nextOccurrences,
-  occurrenceDate,
   recurringHorizon,
   todayAtNoon,
 } from './series'
@@ -15,8 +14,9 @@ import {
 export async function extendRecurringSeries(userId: string) {
   const today = todayAtNoon()
   const horizon = recurringHorizon(today)
-  // Só estende quando a folga cai abaixo de ~1 mês, para não gravar a cada requisição.
-  const threshold = occurrenceDate(today, RECURRING_HORIZON_MONTHS - 1, today.getUTCDate())
+  // Só estende quando o último mês do horizonte ainda não tem ocorrência
+  // (no máximo uma vez por mês por série, não a cada requisição).
+  const threshold = new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth() + RECURRING_HORIZON_MONTHS, 1))
 
   const due = await prisma.transactionSeries.findMany({
     where: { userId, kind: 'RECURRING', active: true, generatedUntil: { lt: threshold } },

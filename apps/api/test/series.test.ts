@@ -83,6 +83,15 @@ describe('recurringHorizon', () => {
     expect(dates).toHaveLength(12)
     expect(day(dates[11])).toBe('2027-10-18')
   })
+
+  it('cobre o 12º mês inteiro mesmo quando a série vence depois de hoje no mês', () => {
+    // Criada em 18/11 com vencimento dia 21: outubro/2027 precisa entrar na previsão.
+    const today = d('2026-11-18')
+    const first = d('2026-11-21')
+    const dates = [first, ...nextOccurrences(first, 21, recurringHorizon(today))]
+    expect(dates).toHaveLength(12)
+    expect(day(dates[11])).toBe('2027-10-21')
+  })
 })
 
 describe('todayAtNoon', () => {

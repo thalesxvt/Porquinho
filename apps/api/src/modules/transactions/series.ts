@@ -86,9 +86,13 @@ export function dayBounds(noon: Date): { start: Date; end: Date } {
   return { start: new Date(noon.getTime() - 12 * HOUR), end: new Date(noon.getTime() + 12 * HOUR) }
 }
 
-/** Limite até onde uma série recorrente deve estar gerada, a partir de `now`. */
+/**
+ * Limite até onde uma série recorrente deve estar gerada: o último dia do mês
+ * daqui a RECURRING_HORIZON_MONTHS meses, para que todo mês da previsão tenha
+ * a sua ocorrência, qualquer que seja o dia de vencimento.
+ */
 export function recurringHorizon(now: Date): Date {
-  return occurrenceDate(now, RECURRING_HORIZON_MONTHS, now.getUTCDate())
+  return new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + RECURRING_HORIZON_MONTHS + 1, 0, 23, 59, 59))
 }
 
 export interface MonthFlow {
