@@ -39,7 +39,6 @@ export function mapTransaction(t: TransactionRow) {
     id: t.id,
     amountCents: t.amountCents,
     type: t.type,
-    paidByOthers: t.paidByOthers,
     status: t.status,
     description: decrypt(t.description),
     date: t.date.toISOString(),
@@ -156,7 +155,6 @@ export class TransactionsService {
     const date = new Date(input.date)
     const common = {
       type: input.type,
-      paidByOthers: input.type === 'EXPENSE' && input.paidByOthers === true,
       description: encrypt(input.description), // 🔐 Criptografado antes de salvar
       categoryId: input.categoryId,
       accountId,
@@ -234,18 +232,10 @@ export class TransactionsService {
     // Mover a transação para outra conta: valida que a conta é do usuário.
     const accountId = input.accountId ? await resolveAccountId(userId, input.accountId) : undefined
 
-    // paidByOthers só faz sentido em despesas: se o tipo final não for EXPENSE, zera.
-    const finalType = input.type ?? transaction.type
-    const paidByOthers =
-      finalType !== 'EXPENSE'
-        ? false
-        : input.paidByOthers ?? transaction.paidByOthers
-
     // Campos que valem para a série inteira (data e status são de cada ocorrência).
     const shared = {
       ...(input.amountCents !== undefined && { amountCents: input.amountCents }),
       ...(input.type !== undefined && { type: input.type }),
-      paidByOthers,
       // 🔐 Re-criptografa a nova descrição ao atualizar
       ...(input.description !== undefined && { description: encrypt(input.description) }),
       ...(input.categoryId !== undefined && { categoryId: input.categoryId }),

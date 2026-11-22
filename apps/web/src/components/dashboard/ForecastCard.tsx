@@ -179,7 +179,7 @@ export function ForecastCard({ months = 6, showTable = false, className }: Forec
                   </tbody>
                 </table>
                 <p className="mt-2 text-[11px] text-[#758695]">
-                  Contas atrasadas entram no mês atual. Despesas pagas por terceiros não entram.
+                  Contas atrasadas entram no mês atual.
                 </p>
               </div>
             )}

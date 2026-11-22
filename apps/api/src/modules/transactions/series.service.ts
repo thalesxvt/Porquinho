@@ -38,7 +38,6 @@ export async function extendRecurringSeries(userId: string) {
         data: dates.map((date) => ({
           amountCents: series.amountCents,
           type: series.type,
-          paidByOthers: series.paidByOthers,
           // Já criptografado no molde. Copiar o texto cifrado é seguro: o IV só se
           // repete junto com o mesmo conteúdo, nunca com um texto diferente.
           description: series.description,

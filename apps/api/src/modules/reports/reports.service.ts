@@ -45,23 +45,21 @@ async function getTotals(userId: string, accountId: string, start: Date, end: Da
   }
 
   const result = await prisma.transaction.groupBy({
-    by: ['type', 'paidByOthers'],
+    by: ['type'],
     where,
     _sum: { amountCents: true },
   })
 
-  const sum = (type: string, paidByOthers = false) =>
+  const sum = (type: string) =>
     result
-      .filter((r) => r.type === type && r.paidByOthers === paidByOthers)
+      .filter((r) => r.type === type)
       .reduce((acc, r) => acc + (r._sum.amountCents ?? 0), 0)
 
   const income = sum('INCOME')
   const expense = sum('EXPENSE')
   const invested = sum('INVESTMENT')
-  // Despesas pagas por terceiros ficam fora do saldo e do total de despesas.
-  const paidByOthers = sum('EXPENSE', true)
   // Investimento sai do caixa, mas não é despesa.
-  return { income, expense, invested, paidByOthers, balance: income - expense - invested }
+  return { income, expense, invested, balance: income - expense - invested }
 }
 
 /** Saldo realizado (só PAID) antes de `beforeDate`, ou de todo o histórico se omitida. */
@@ -71,7 +69,6 @@ async function getPriorBalance(userId: string, accountId: string, beforeDate?: D
     where: {
       userId,
       accountId,
-      paidByOthers: false,
       status: 'PAID',
       ...(beforeDate && { date: { lt: beforeDate } }),
     },
@@ -101,14 +98,12 @@ export class ReportsService {
       totalIncome: current.income,
       totalExpense: current.expense,
       totalInvested: current.invested,
-      totalPaidByOthers: current.paidByOthers,
       monthBalance,
       rolloverBalance,
       balance: totalBalance,
       previousIncome: previous.income,
       previousExpense: previous.expense,
       previousInvested: previous.invested,
-      previousPaidByOthers: previous.paidByOthers,
       previousBalance: previous.balance,
     }
   }
@@ -122,7 +117,6 @@ export class ReportsService {
         userId,
         accountId,
         type: 'EXPENSE',
-        paidByOthers: false,
         status: 'PAID',
         date: { gte: range.start, lte: range.end },
       },
@@ -232,8 +226,6 @@ export class ReportsService {
     let totalToPay = 0
     let totalToReceive = 0
     for (const t of items) {
-      // Pagas por terceiros aparecem na lista, mas não pesam no seu bolso.
-      if (t.paidByOthers) continue
       if (t.type === 'INCOME') totalToReceive += t.amountCents
       else totalToPay += t.amountCents
     }
@@ -267,7 +259,6 @@ export class ReportsService {
           userId,
           accountId,
           status: 'PENDING',
-          paidByOthers: false,
           date: { lt: bounds[months] },
         },
         select: { amountCents: true, type: true, date: true },

@@ -80,8 +80,6 @@ model Transaction {
   id                String             @id @default(cuid())
   amountCents       Int
   type              TransactionType
-  // Despesa paga por terceiros (ex.: cartão dos pais): registrada, mas não sai do saldo.
-  paidByOthers      Boolean            @default(false)
   description       String
   // PAID: data do pagamento. PENDING: data de vencimento.
   date              DateTime
@@ -103,7 +101,6 @@ model Transaction {
 
   @@index([userId, date])
   @@index([userId, type])
-  @@index([userId, paidByOthers])
   @@index([userId, status, date])
   @@index([categoryId])
   @@index([accountId, date])
@@ -124,7 +121,6 @@ model TransactionSeries {
   active           Boolean         @default(true)
   amountCents      Int
   type             TransactionType
-  paidByOthers     Boolean         @default(false)
   description      String // criptografado, como em Transaction
   categoryId       String
   category         Category        @relation(fields: [categoryId], references: [id], onDelete: Cascade)

@@ -30,8 +30,6 @@ const TransactionBaseSchema = z.object({
   categoryId: z.string().cuid(),
   // Conta da transação; se omitida, a API usa a conta padrão do usuário.
   accountId: z.string().cuid().optional(),
-  // Só vale para despesas; a API grava false para os outros tipos.
-  paidByOthers: z.boolean().optional(),
   // Padrão PAID. PENDING = conta a pagar/receber, com `date` como vencimento.
   status: TransactionStatusEnum.optional(),
 })
@@ -50,7 +48,6 @@ export interface Transaction {
   id: string
   amountCents: number
   type: TransactionType
-  paidByOthers: boolean
   status: TransactionStatus
   description: string
   date: string

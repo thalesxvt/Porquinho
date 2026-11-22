@@ -48,7 +48,7 @@ export class AccountsService {
       prisma.transaction.groupBy({
         by: ['accountId', 'type'],
         // Saldo = só o que já foi pago/recebido; pendentes não entram.
-        where: { userId, paidByOthers: false, status: 'PAID' },
+        where: { userId, status: 'PAID' },
         _sum: { amountCents: true },
       }),
       prisma.transaction.groupBy({

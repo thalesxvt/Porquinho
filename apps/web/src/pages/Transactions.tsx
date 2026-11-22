@@ -1,4 +1,3 @@
-import { PaidByOthersBadge } from '../components/transactions/PaidByOthersBadge'
 import { TransactionStatusBadges } from '../components/transactions/TransactionStatusBadges'
 import { PayButton } from '../components/transactions/PayButton'
 import { useState } from 'react'
@@ -384,7 +383,6 @@ export function Transactions() {
                                 <p className="font-bold text-[#111111] group-hover:text-black truncate">
                                   {t.description}
                                 </p>
-                                {t.paidByOthers && <PaidByOthersBadge />}
                                 <TransactionStatusBadges transaction={t} />
                               </div>
                               <span className="text-[11px] text-[#758695] font-medium">
@@ -472,7 +470,6 @@ export function Transactions() {
                             <p className="font-bold text-sm text-[#111111] truncate">
                               {t.description}
                             </p>
-                            {t.paidByOthers && <PaidByOthersBadge />}
                             <TransactionStatusBadges transaction={t} />
                           </div>
                           <p className="text-[11px] text-[#758695] font-medium">

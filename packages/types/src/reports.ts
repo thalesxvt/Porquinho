@@ -6,14 +6,12 @@ export interface Summary {
   totalIncome: number       // centavos do período
   totalExpense: number      // centavos do período
   totalInvested: number     // centavos de transações do tipo INVESTMENT no período
-  totalPaidByOthers: number // centavos de despesas pagas por terceiros (fora do saldo)
   monthBalance: number      // centavos líquido do período (income - expense - invested)
   rolloverBalance: number   // centavos saldo que sobrou do mês anterior
   balance: number           // centavos saldo total disponível (rolloverBalance + monthBalance)
   previousIncome: number
   previousExpense: number
   previousInvested: number  // centavos investidos no período anterior
-  previousPaidByOthers: number
   previousBalance: number
 }
 
@@ -55,7 +53,7 @@ export interface ForecastMonth {
   month: string             // '2026-12'
   monthLabel: string        // 'dez'
   expectedIncome: number    // centavos pendentes a receber no mês
-  expectedExpense: number   // centavos pendentes a pagar no mês (sem pagos por terceiros)
+  expectedExpense: number   // centavos pendentes a pagar no mês
   expectedInvested: number  // centavos pendentes de investimento no mês
   endingBalance: number     // saldo previsto no fim do mês
 }

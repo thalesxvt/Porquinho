@@ -26,7 +26,6 @@ const schema = z.object({
   // Vazio só se as contas ainda não carregaram: a API usa a conta padrão.
   accountId: z.string(),
   date: z.string().min(1, 'Data é obrigatória'),
-  paidByOthers: z.boolean(),
   status: z.enum(['PAID', 'PENDING']),
   // Só na criação: NONE = avulsa, INSTALLMENT = parcelar o total, RECURRING = todo mês.
   repeatKind: z.enum(['NONE', 'INSTALLMENT', 'RECURRING']),
@@ -78,7 +77,6 @@ export function TransactionForm({
           categoryId: defaultValues.categoryId,
           accountId: initialAccountId,
           date: format(new Date(defaultValues.date), 'yyyy-MM-dd'),
-          paidByOthers: defaultValues.paidByOthers ?? false,
           status: defaultValues.status ?? 'PAID',
           repeatKind: 'NONE',
           installments: '2',
@@ -90,7 +88,6 @@ export function TransactionForm({
           description: '',
           categoryId: '',
           accountId: initialAccountId,
-          paidByOthers: false,
           status: 'PAID',
           repeatKind: 'NONE',
           installments: '2',
@@ -139,7 +136,6 @@ export function TransactionForm({
       categoryId: data.categoryId,
       accountId: data.accountId || undefined,
       date: new Date(data.date + 'T12:00:00.000Z').toISOString(),
-      paidByOthers: data.type === 'EXPENSE' && data.paidByOthers,
       status: data.status,
       ...(!isEditing && data.repeatKind === 'INSTALLMENT' && {
         repeat: { kind: 'INSTALLMENT', count: Number(data.installments) },
@@ -343,18 +339,6 @@ export function TransactionForm({
           error={errors.accountId?.message}
           {...register('accountId')}
         />
-      )}
-
-      {/* Despesa paga por outra pessoa (ex.: cartão dos pais) */}
-      {selectedType === 'EXPENSE' && (
-        <label className="flex cursor-pointer items-center gap-3 rounded-xl border border-[#DDD7C0] bg-[#FAF8F2] p-3 transition-colors hover:border-[#758695]">
-          <input
-            type="checkbox"
-            className="h-4 w-4 shrink-0 cursor-pointer accent-[#111111]"
-            {...register('paidByOthers')}
-          />
-          <span className="text-xs font-bold text-slate-700">Pago por terceiros</span>
-        </label>
       )}
 
       {/* Action buttons */}

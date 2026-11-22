@@ -1,4 +1,3 @@
-import { PaidByOthersBadge } from '../transactions/PaidByOthersBadge'
 import { TransactionStatusBadges } from '../transactions/TransactionStatusBadges'
 import { PayButton } from '../transactions/PayButton'
 import { useState } from 'react'
@@ -293,7 +292,6 @@ export function MonthTransactionsTable({ selectedDate }: MonthTransactionsTableP
                             <span className="font-bold text-[#111111] group-hover:text-black truncate">
                               {t.description}
                             </span>
-                            {t.paidByOthers && <PaidByOthersBadge />}
                             <TransactionStatusBadges transaction={t} />
                           </div>
                         </td>
@@ -376,7 +374,6 @@ export function MonthTransactionsTable({ selectedDate }: MonthTransactionsTableP
                             <p className="font-bold text-sm text-[#111111] truncate">
                               {t.description}
                             </p>
-                            {t.paidByOthers && <PaidByOthersBadge />}
                             <TransactionStatusBadges transaction={t} />
                           </div>
                           <p className="text-[11px] text-[#758695] font-medium">
