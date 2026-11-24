@@ -7,6 +7,7 @@ const service = new TransactionsService()
 const ERRORS: Record<string, [number, string]> = {
   NOT_FOUND: [404, 'Transação não encontrada'],
   CATEGORY_NOT_FOUND: [404, 'Categoria não encontrada'],
+  CATEGORY_TYPE_MISMATCH: [400, 'Essa categoria não é do mesmo tipo da transação'],
   ACCOUNT_NOT_FOUND: [404, 'Conta não encontrada'],
   AMOUNT_TOO_SMALL: [400, 'Valor pequeno demais para o número de parcelas'],
 }

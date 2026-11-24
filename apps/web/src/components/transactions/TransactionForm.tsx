@@ -66,6 +66,7 @@ export function TransactionForm({
     watch,
     control,
     setValue,
+    getValues,
     formState: { errors },
   } = useForm<FormData>({
     resolver: zodResolver(schema),
@@ -132,6 +133,18 @@ export function TransactionForm({
   const filteredCategories = categories.filter(
     (c) => c.type === selectedType || c.type === 'BOTH'
   )
+
+  // Trocou o tipo e a categoria escolhida não serve mais: limpa, senão ela seria
+  // salva mesmo sumindo da lista (ex.: "Alimentação" numa receita).
+  useEffect(() => {
+    if (categories.length === 0) return
+    const current = getValues('categoryId')
+    if (!current) return
+    const category = categories.find((c) => c.id === current)
+    if (!category || (category.type !== selectedType && category.type !== 'BOTH')) {
+      setValue('categoryId', '')
+    }
+  }, [selectedType, categories, getValues, setValue])
 
   const handleFormSubmit = async (data: FormData) => {
     await onSubmit({

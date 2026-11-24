@@ -56,6 +56,11 @@ export function mapTransaction(t: TransactionRow) {
   }
 }
 
+/** Categoria "BOTH" serve para qualquer tipo; as outras só para o próprio tipo. */
+function categoryFitsType(categoryType: string, transactionType: string): boolean {
+  return categoryType === 'BOTH' || categoryType === transactionType
+}
+
 export class TransactionsService {
   async findAll(userId: string, params: ListParams) {
     const page = params.page ?? 1
@@ -166,6 +171,7 @@ export class TransactionsService {
       where: { id: input.categoryId, userId },
     })
     if (!category) throw new Error('CATEGORY_NOT_FOUND')
+    if (!categoryFitsType(category.type, input.type)) throw new Error('CATEGORY_TYPE_MISMATCH')
 
     const accountId = await resolveAccountId(userId, input.accountId)
 
@@ -240,11 +246,15 @@ export class TransactionsService {
     const transaction = await prisma.transaction.findFirst({ where: { id, userId } })
     if (!transaction) throw new Error('NOT_FOUND')
 
-    if (input.categoryId) {
+    // Mudou a categoria ou o tipo: a combinação final precisa ser válida.
+    if (input.categoryId !== undefined || input.type !== undefined) {
       const category = await prisma.category.findFirst({
-        where: { id: input.categoryId, userId },
+        where: { id: input.categoryId ?? transaction.categoryId, userId },
       })
       if (!category) throw new Error('CATEGORY_NOT_FOUND')
+      if (!categoryFitsType(category.type, input.type ?? transaction.type)) {
+        throw new Error('CATEGORY_TYPE_MISMATCH')
+      }
     }
 
     // Mover a transação para outra conta: valida que a conta é do usuário.

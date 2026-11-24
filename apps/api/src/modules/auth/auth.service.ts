@@ -29,6 +29,14 @@ const DEFAULT_CATEGORIES: Array<{
   { name: 'Outros',        type: 'INVESTMENT', color: '#6b7280', icon: 'MoreHorizontal' },
 ]
 
+/**
+ * Busca por e-mail sem diferenciar maiúsculas. Novos e-mails já são gravados em
+ * minúsculas, mas contas antigas podem ter sido cadastradas com maiúsculas.
+ */
+function findUserByEmail(email: string) {
+  return prisma.user.findFirst({ where: { email: { equals: email, mode: 'insensitive' } } })
+}
+
 function toAuthUser(user: User): AuthUser {
   return {
     id: user.id,
@@ -40,32 +48,36 @@ function toAuthUser(user: User): AuthUser {
 
 export class AuthService {
   async register(input: RegisterInput): Promise<AuthResponse> {
-    const existing = await prisma.user.findUnique({ where: { email: input.email } })
+    const existing = await findUserByEmail(input.email)
     if (existing) {
       throw new Error('EMAIL_ALREADY_EXISTS')
     }
 
     const passwordHash = await bcrypt.hash(input.password, 10)
 
-    const user = await prisma.user.create({
-      data: {
-        email: input.email,
-        name: input.name,
-        passwordHash,
-      },
-    })
+    // Tudo ou nada: sem isso, uma falha no meio deixaria o usuário sem categorias.
+    const user = await prisma.$transaction(async (tx) => {
+      const created = await tx.user.create({
+        data: {
+          email: input.email,
+          name: input.name,
+          passwordHash,
+        },
+      })
 
-    // Create default categories for new user
-    await prisma.category.createMany({
-      data: DEFAULT_CATEGORIES.map((cat) => ({
-        ...cat,
-        isDefault: true,
-        userId: user.id,
-      })),
-    })
+      // Create default categories for new user
+      await tx.category.createMany({
+        data: DEFAULT_CATEGORIES.map((cat) => ({
+          ...cat,
+          isDefault: true,
+          userId: created.id,
+        })),
+      })
 
-    // Conta inicial: todas as transações pertencem a alguma conta.
-    await prisma.account.create({ data: { ...DEFAULT_ACCOUNT, userId: user.id } })
+      // Conta inicial: todas as transações pertencem a alguma conta.
+      await tx.account.create({ data: { ...DEFAULT_ACCOUNT, userId: created.id } })
+      return created
+    })
 
     const token = signToken({ userId: user.id, email: user.email })
 
@@ -76,7 +88,7 @@ export class AuthService {
   }
 
   async login(input: LoginInput): Promise<AuthResponse> {
-    const user = await prisma.user.findUnique({ where: { email: input.email } })
+    const user = await findUserByEmail(input.email)
 
     if (!user) {
       throw new Error('INVALID_CREDENTIALS')
@@ -104,8 +116,8 @@ export class AuthService {
     const user = await prisma.user.findUniqueOrThrow({ where: { id: userId } })
 
     // If changing email, check if another user has it
-    if (input.email !== user.email) {
-      const existing = await prisma.user.findUnique({ where: { email: input.email } })
+    if (input.email !== user.email.toLowerCase()) {
+      const existing = await findUserByEmail(input.email)
       if (existing && existing.id !== userId) {
         throw new Error('EMAIL_ALREADY_EXISTS')
       }

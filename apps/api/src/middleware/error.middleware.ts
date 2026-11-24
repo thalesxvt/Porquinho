@@ -11,6 +11,11 @@ export function errorHandler(
     return
   }
 
+  if (err.message === 'INVALID_DATE') {
+    res.status(400).json({ error: 'Data inválida' })
+    return
+  }
+
   console.error(`[Error] ${err.message}`, err.stack)
 
   if (err.name === 'ZodError' || Array.isArray(err.errors)) {

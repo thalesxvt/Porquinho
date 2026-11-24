@@ -8,7 +8,10 @@ const service = new ReportsService()
 export class ReportsController {
   private getRefDate(req: AuthRequest): Date {
     if (req.query.date) {
-      return new Date(req.query.date as string)
+      const date = new Date(req.query.date as string)
+      // Data inválida responde 400 (no errorHandler) em vez de estourar 500 no Prisma.
+      if (Number.isNaN(date.getTime())) throw new Error('INVALID_DATE')
+      return date
     }
     if (req.query.year && req.query.month) {
       const year = parseInt(req.query.year as string, 10)
