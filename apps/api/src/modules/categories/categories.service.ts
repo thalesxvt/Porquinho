@@ -1,5 +1,14 @@
+import { Prisma } from '@prisma/client'
 import { prisma } from '../../lib/prisma'
 import type { CreateCategoryInput, UpdateCategoryInput } from '@porquinho/types'
+
+/** Nome + tipo já usado por outra categoria do usuário (@@unique no schema). */
+function rethrowNameTaken(e: unknown): never {
+  if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === 'P2002') {
+    throw new Error('NAME_TAKEN')
+  }
+  throw e
+}
 
 export class CategoriesService {
   async findAll(userId: string) {
@@ -10,9 +19,11 @@ export class CategoriesService {
   }
 
   async create(userId: string, input: CreateCategoryInput) {
-    return prisma.category.create({
-      data: { ...input, userId },
-    })
+    return prisma.category
+      .create({
+        data: { ...input, userId },
+      })
+      .catch(rethrowNameTaken)
   }
 
   async update(userId: string, id: string, input: UpdateCategoryInput) {
@@ -29,10 +40,12 @@ export class CategoriesService {
       if (txConflicts + seriesConflicts > 0) throw new Error('TYPE_CHANGE_CONFLICT')
     }
 
-    return prisma.category.update({
-      where: { id },
-      data: input,
-    })
+    return prisma.category
+      .update({
+        where: { id },
+        data: input,
+      })
+      .catch(rethrowNameTaken)
   }
 
   async delete(userId: string, id: string) {

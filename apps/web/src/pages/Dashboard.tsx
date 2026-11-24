@@ -178,14 +178,15 @@ export function Dashboard() {
       <div className="mb-6 grid grid-cols-1 gap-5 lg:grid-cols-3">
         {/* Monthly evolution */}
         <Card className="lg:col-span-2 overflow-hidden flex flex-col justify-between">
-          <CardHeader className="border-b border-[#DDD7C0] pb-3">
+          {/* No celular a legenda desce para baixo do título (e pode quebrar linha). */}
+          <CardHeader className="border-b border-[#DDD7C0] pb-3 flex-col sm:flex-row items-start sm:items-center gap-2">
             <div>
               <CardTitle>Evolução Mensal</CardTitle>
               <CardDescription>
                 Histórico de receitas, despesas e investimentos de {selectedMonthDate.getFullYear()}
               </CardDescription>
             </div>
-            <div className="flex items-center gap-3 text-xs font-bold">
+            <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs font-bold">
               <span className="inline-flex items-center gap-1.5 text-[#5C6D7C]">
                 <span className="h-2.5 w-2.5 rounded-full bg-emerald-500" />
                 Receitas

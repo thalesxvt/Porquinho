@@ -4,6 +4,8 @@ import type { AuthRequest } from '../../middleware/auth.middleware'
 
 const service = new CategoriesService()
 
+const NAME_TAKEN_MESSAGE = 'Já existe uma categoria com esse nome nesse tipo'
+
 export class CategoriesController {
   async getAll(req: AuthRequest, res: Response): Promise<void> {
     const categories = await service.findAll(req.userId!)
@@ -11,8 +13,16 @@ export class CategoriesController {
   }
 
   async create(req: AuthRequest, res: Response): Promise<void> {
-    const category = await service.create(req.userId!, req.body)
-    res.status(201).json({ data: category })
+    try {
+      const category = await service.create(req.userId!, req.body)
+      res.status(201).json({ data: category })
+    } catch (error: unknown) {
+      if (error instanceof Error && error.message === 'NAME_TAKEN') {
+        res.status(409).json({ error: NAME_TAKEN_MESSAGE })
+        return
+      }
+      throw error
+    }
   }
 
   async update(req: AuthRequest, res: Response): Promise<void> {
@@ -22,6 +32,10 @@ export class CategoriesController {
     } catch (error: unknown) {
       if (error instanceof Error && error.message === 'NOT_FOUND') {
         res.status(404).json({ error: 'Categoria não encontrada' })
+        return
+      }
+      if (error instanceof Error && error.message === 'NAME_TAKEN') {
+        res.status(409).json({ error: NAME_TAKEN_MESSAGE })
         return
       }
       if (error instanceof Error && error.message === 'TYPE_CHANGE_CONFLICT') {
