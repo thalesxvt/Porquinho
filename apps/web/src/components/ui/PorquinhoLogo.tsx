@@ -18,29 +18,30 @@ export function PorquinhoLogo({
 }: PorquinhoLogoProps) {
   const iconSizes = {
     sm: 'h-8 w-8',
-    md: 'h-10 w-10',
+    md: 'h-11 w-11',
     lg: 'h-12 w-12',
     xl: 'h-16 w-16',
   }
 
+  // O porquinho ocupa ~55% do quadrado: menor que isso ele some dentro da caixa.
   const svgSizes = {
-    sm: 15,
-    md: 18,
-    lg: 22,
-    xl: 28,
+    sm: 18,
+    md: 24,
+    lg: 26,
+    xl: 34,
   }
 
   const textSizes = {
-    sm: 'text-sm',
-    md: 'text-base',
-    lg: 'text-lg',
-    xl: 'text-2xl',
+    sm: 'text-base',
+    md: 'text-xl',
+    lg: 'text-2xl',
+    xl: 'text-3xl',
   }
 
   const isWhite = variant === 'white'
 
   return (
-    <div className={`flex items-center gap-3 ${className}`}>
+    <div className={`flex items-center gap-2.5 ${className}`}>
       <div
         className={`relative flex ${iconSizes[size]} shrink-0 items-center justify-center rounded-xl bg-zinc-950 text-[#F1ECDA] shadow-sm ring-1 ${
           isWhite ? 'ring-[#758695]/40' : 'ring-[#758695]/30'
@@ -78,7 +79,7 @@ export function PorquinhoLogo({
       {showText && (
         <div className="flex flex-col leading-none">
           <span
-            className={`font-bold tracking-tight ${
+            className={`font-extrabold tracking-tight ${
               isWhite ? 'text-white' : 'text-zinc-950'
             } ${textSizes[size]}`}
           >

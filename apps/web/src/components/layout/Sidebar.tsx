@@ -81,7 +81,7 @@ export function Sidebar() {
       {/* Desktop Sidebar */}
       <aside className="fixed left-0 top-0 z-40 hidden h-screen w-[var(--sidebar-width)] flex-col border-r border-[#DDD7C0] bg-[#FAF8F2] md:flex">
         {/* Brand Header */}
-        <div className="flex items-center justify-between border-b border-[#DDD7C0] px-5 py-3">
+        <div className="flex h-[4.5rem] items-center border-b border-[#DDD7C0] px-4">
           <PorquinhoLogo size="md"/>
         </div>
 
