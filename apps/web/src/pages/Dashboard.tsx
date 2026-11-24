@@ -20,7 +20,7 @@ import { ForecastCard } from '../components/dashboard/ForecastCard'
 import { Button } from '../components/ui/Button'
 import { Card, CardHeader, CardTitle, CardDescription } from '../components/ui/Card'
 import { KPICardSkeleton, ChartSkeleton } from '../components/ui/Skeleton'
-import { useSummary, useCategoryReport, useMonthlyReport, useAvailableMonths } from '../hooks/useReports'
+import { useSummary, useCategoryReport, useMonthlyReport } from '../hooks/useReports'
 import { formatCurrency } from '../lib/formatters'
 import { useTransactionModalStore } from '../stores/transactionModal.store'
 import {
@@ -52,15 +52,6 @@ export function Dashboard() {
   const { data: summary, isLoading: summaryLoading } = useSummary(period, dateParams)
   const { data: byCategory = [], isLoading: categoryLoading } = useCategoryReport(period, dateParams)
   const { data: monthly = [], isLoading: monthlyLoading } = useMonthlyReport(selectedMonthDate.getFullYear())
-  const { data: availableMonthsRaw = [] } = useAvailableMonths()
-
-  // Convert 'yyyy-MM' strings to Date objects for MonthSelector (oldest first → most recent on the right)
-  const availableMonths = [...availableMonthsRaw]
-    .reverse()
-    .map((m: string) => {
-      const [year, month] = m.split('-').map(Number)
-      return new Date(year, month - 1, 1)
-    })
 
   const monthlyChartData = monthly.map((m: any) => ({
     name: m.monthLabel,
@@ -115,7 +106,6 @@ export function Dashboard() {
           <MonthSelector
             selectedDate={selectedMonthDate}
             onChange={setSelectedMonthDate}
-            availableMonths={availableMonths.length > 0 ? availableMonths : undefined}
           />
         </div>
       )}
