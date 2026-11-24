@@ -182,7 +182,10 @@ export class ReportsService {
       distinct: ['date'],
     })
 
-    const monthSet = new Set<string>()
+    // O mês atual entra sempre, mesmo sem transação paga: na virada do mês ele
+    // só tem pendentes, e precisa aparecer nos atalhos e no filtro mesmo assim.
+    // (todayAtNoon é 12:00 UTC, então o format dá o mesmo mês em qualquer fuso.)
+    const monthSet = new Set<string>([format(todayAtNoon(), 'yyyy-MM')])
     for (const row of rows) {
       monthSet.add(format(row.date, 'yyyy-MM'))
     }

@@ -42,7 +42,10 @@ import {
 
 export function Reports() {
   const [period, setPeriod] = useState<Period>('month')
-  const [selectedMonthDate, setSelectedMonthDate] = useState<Date>(new Date(2026, 10, 1))
+  const [selectedMonthDate, setSelectedMonthDate] = useState<Date>(() => {
+    const now = new Date()
+    return new Date(now.getFullYear(), now.getMonth(), 1)
+  })
   const [chartView, setChartView] = useState<'bars' | 'area'>('bars')
   const [selectedCategoryFilter, setSelectedCategoryFilter] = useState<string>('')
 
@@ -56,7 +59,9 @@ export function Reports() {
 
   const { data: categories = [] } = useCategories()
   const { data: availableMonthsRaw = [] } = useAvailableMonths()
-  const availableMonths = [...(availableMonthsRaw as string[])]
+  // Só os 5 meses mais recentes, do mais antigo para o mais novo (igual ao Dashboard)
+  const availableMonths = (availableMonthsRaw as string[])
+    .slice(0, 5)
     .reverse()
     .map((m) => {
       const [year, month] = m.split('-').map(Number)
