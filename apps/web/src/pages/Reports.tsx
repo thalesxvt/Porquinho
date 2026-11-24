@@ -191,7 +191,7 @@ export function Reports() {
       </div>
 
       {/* Previsão de saldo para os próximos 12 meses, com tabela mês a mês */}
-      <ForecastCard months={12} showTable className="mb-6" />
+      <ForecastCard months={12} className="mb-6" />
 
       {/* Main Chart Section: Monthly Cash Flow */}
       <Card className="mb-6 overflow-hidden">

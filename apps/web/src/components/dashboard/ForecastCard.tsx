@@ -26,13 +26,11 @@ function longMonth(month: string): string {
 
 interface ForecastCardProps {
   months?: number
-  /** Mostra a tabela mês a mês abaixo do gráfico (página de Relatórios). */
-  showTable?: boolean
   className?: string
 }
 
 /** Saldo previsto: parte do saldo de hoje e soma as contas pendentes de cada mês. */
-export function ForecastCard({ months = 6, showTable = false, className }: ForecastCardProps) {
+export function ForecastCard({ months = 6, className }: ForecastCardProps) {
   const { data, isLoading } = useForecast(months)
   // IDs únicos para os gradientes do SVG (evita colisão se houver dois gráficos na tela).
   const gid = useId().replace(/:/g, '')
@@ -145,43 +143,6 @@ export function ForecastCard({ months = 6, showTable = false, className }: Forec
               <p className="mt-3 text-center text-[11px] text-[#758695]">
                 Sem contas pendentes nos próximos meses: o saldo fica estável.
               </p>
-            )}
-
-            {showTable && (
-              <div className="mt-4 overflow-x-auto border-t border-[#DDD7C0] pt-3">
-                <table className="w-full text-left text-xs">
-                  <thead>
-                    <tr className="text-[10px] font-bold uppercase tracking-wider text-[#5C6D7C]">
-                      <th className="py-2 pr-3">Mês</th>
-                      <th className="py-2 px-3 text-right">A receber</th>
-                      <th className="py-2 px-3 text-right">A pagar</th>
-                      <th className="py-2 px-3 text-right">Investir</th>
-                      <th className="py-2 pl-3 text-right">Saldo previsto</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-[#DDD7C0] tabular-nums font-semibold">
-                    {data.months.map((m) => (
-                      <tr key={m.month}>
-                        <td className="py-2 pr-3 text-[#111111]">{capitalize(longMonth(m.month))}</td>
-                        <td className="py-2 px-3 text-right text-emerald-700">{formatCurrency(m.expectedIncome)}</td>
-                        <td className="py-2 px-3 text-right text-rose-700">{formatCurrency(m.expectedExpense)}</td>
-                        <td className="py-2 px-3 text-right text-blue-700">{formatCurrency(m.expectedInvested)}</td>
-                        <td
-                          className={cn(
-                            'py-2 pl-3 text-right font-extrabold',
-                            m.endingBalance < 0 ? 'text-rose-700' : 'text-[#111111]'
-                          )}
-                        >
-                          {formatCurrency(m.endingBalance)}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-                <p className="mt-2 text-[11px] text-[#758695]">
-                  Contas atrasadas entram no mês atual.
-                </p>
-              </div>
             )}
           </>
         )}
