@@ -9,18 +9,18 @@ import { Select } from '../ui/Select'
 import { useCategories } from '../../hooks/useCategories'
 import { useActiveAccount } from '../../hooks/useAccounts'
 import { toCents, centsToFloat, formatCurrency } from '../../lib/formatters'
+import { MAX_AMOUNT_CENTS } from '@porquinho/types'
 import { cn } from '../../lib/utils'
 import { ArrowDownLeft, ArrowUpRight, TrendingUp, DollarSign, Calendar, FileText, Hash } from 'lucide-react'
 
 const schema = z.object({
-  description: z.string().min(1, 'Descrição é obrigatória').max(255),
-  amount: z.string().min(1, 'Valor é obrigatório').refine(
-    (v) => {
-      const n = parseFloat(v.replace(/[^\d.,-]/g, '').replace(',', '.'))
-      return !isNaN(n) && n > 0
-    },
-    'Valor deve ser maior que zero'
-  ),
+  description: z.string().trim().min(1, 'Descrição é obrigatória').max(255),
+  amount: z
+    .string()
+    .min(1, 'Valor é obrigatório')
+    // Mesma conversão usada no envio, para "1.500,00" e "0,001" darem o que a API vai receber.
+    .refine((v) => toCents(v) > 0, 'Valor deve ser maior que zero')
+    .refine((v) => toCents(v) <= MAX_AMOUNT_CENTS, 'Valor muito alto'),
   type: z.enum(['EXPENSE', 'INCOME', 'INVESTMENT']),
   categoryId: z.string().min(1, 'Categoria é obrigatória'),
   // Vazio só se as contas ainda não carregaram: a API usa a conta padrão.

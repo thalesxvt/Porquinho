@@ -13,6 +13,7 @@ import {
 import { AccountSwitcher } from '../accounts/AccountSwitcher'
 import { cn } from '../../lib/utils'
 import { useAuthStore } from '../../stores/auth.store'
+import { useTourStore } from '../../stores/tour.store'
 import { useTransactionModalStore } from '../../stores/transactionModal.store'
 import { PorquinhoLogo } from '../ui/PorquinhoLogo'
 import { ProfileModal } from '../profile/ProfileModal'
@@ -33,6 +34,9 @@ export function Sidebar() {
   const navigate = useNavigate()
 
   const handleLogout = () => {
+    // Fecha o tour sem marcá-lo como visto: senão quem entrar depois no mesmo
+    // aparelho o veria aberto no meio (e concluí-lo marcaria o tour dessa pessoa).
+    useTourStore.setState({ isOpen: false, stepIndex: 0 })
     logout()
     navigate('/login')
   }

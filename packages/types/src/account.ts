@@ -1,10 +1,16 @@
 import { z } from 'zod'
+import { MAX_AMOUNT_CENTS } from './transaction'
 
 export const CreateAccountSchema = z.object({
   name: z.string().trim().min(1, 'Nome é obrigatório').max(40),
   color: z.string().regex(/^#[0-9A-Fa-f]{6}$/, 'Cor inválida'),
   /** Saldo que a conta já tinha antes do primeiro lançamento, em centavos (pode ser negativo). */
-  initialBalanceCents: z.number().int().min(-100_000_000_000).max(100_000_000_000).optional(),
+  initialBalanceCents: z
+    .number()
+    .int()
+    .min(-MAX_AMOUNT_CENTS, 'Valor muito alto')
+    .max(MAX_AMOUNT_CENTS, 'Valor muito alto')
+    .optional(),
 })
 
 export const UpdateAccountSchema = CreateAccountSchema.partial()

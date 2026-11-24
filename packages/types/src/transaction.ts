@@ -1,5 +1,11 @@
 import { z } from 'zod'
 
+/**
+ * Maior valor em centavos que o banco guarda (coluna Int de 32 bits):
+ * R$ 21.474.836,47. Acima disso o Prisma estoura com "Erro interno".
+ */
+export const MAX_AMOUNT_CENTS = 2_147_483_647
+
 export const TransactionTypeEnum = z.enum(['EXPENSE', 'INCOME', 'INVESTMENT'])
 export type TransactionType = z.infer<typeof TransactionTypeEnum>
 
@@ -23,9 +29,9 @@ export const PayTransactionSchema = z.object({
 export type PayTransactionInput = z.infer<typeof PayTransactionSchema>
 
 const TransactionBaseSchema = z.object({
-  amountCents: z.number().int().positive('Valor deve ser positivo'),
+  amountCents: z.number().int().positive('Valor deve ser positivo').max(MAX_AMOUNT_CENTS, 'Valor muito alto'),
   type: TransactionTypeEnum,
-  description: z.string().min(1, 'Descrição é obrigatória').max(255),
+  description: z.string().trim().min(1, 'Descrição é obrigatória').max(255),
   date: z.string().datetime(),
   categoryId: z.string().cuid(),
   // Conta da transação; se omitida, a API usa a conta padrão do usuário.

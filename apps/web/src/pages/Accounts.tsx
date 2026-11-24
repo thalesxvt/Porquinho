@@ -21,6 +21,7 @@ import {
 } from '../hooks/useAccounts'
 import { useAccountStore } from '../stores/account.store'
 import { formatCurrency, toCents, centsToFloat } from '../lib/formatters'
+import { MAX_AMOUNT_CENTS } from '@porquinho/types'
 import { cn } from '../lib/utils'
 
 const PRESET_COLORS = [
@@ -44,7 +45,8 @@ const schema = z.object({
   // Vazio = zero. O sinal fica num checkbox: o teclado numérico do celular não tem "-".
   initialBalance: z
     .string()
-    .refine((v) => v.trim() === '' || /^(R\$)?\s*\d[\d.]*(,\d{0,2})?$|^\d+(\.\d{0,2})?$/.test(v.trim()), 'Valor inválido'),
+    .refine((v) => v.trim() === '' || /^(R\$)?\s*\d[\d.]*(,\d{0,2})?$|^\d+(\.\d{0,2})?$/.test(v.trim()), 'Valor inválido')
+    .refine((v) => v.trim() === '' || toCents(v) <= MAX_AMOUNT_CENTS, 'Valor muito alto'),
   initialNegative: z.boolean(),
 })
 
