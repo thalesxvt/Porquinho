@@ -22,7 +22,7 @@ import { Card, CardHeader, CardTitle, CardDescription } from '../components/ui/C
 import { KPICardSkeleton, ChartSkeleton } from '../components/ui/Skeleton'
 import { useSummary, useCategoryReport, useMonthlyReport, useAvailableMonths } from '../hooks/useReports'
 import { formatCurrency } from '../lib/formatters'
-import { suggestedDateInMonth } from '../lib/transactionStatus'
+import { suggestedDateInMonth, todayNoonIso } from '../lib/transactionStatus'
 import { useTransactionModalStore } from '../stores/transactionModal.store'
 import {
   BarChart,
@@ -48,7 +48,9 @@ export function Dashboard() {
   const dateParams =
     period === 'month'
       ? { date: selectedMonthDate.toISOString() }
-      : undefined
+      : // Semana/ano: manda "hoje" no fuso local; sem isso a API usaria o relógio
+        // dela (UTC) e, depois das 21h, pularia para a semana/ano seguinte.
+        { date: todayNoonIso() }
 
   const { data: summary, isLoading: summaryLoading } = useSummary(period, dateParams)
   const { data: byCategory = [], isLoading: categoryLoading } = useCategoryReport(period, dateParams)

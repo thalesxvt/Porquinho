@@ -24,6 +24,12 @@ export class CategoriesController {
         res.status(404).json({ error: 'Categoria não encontrada' })
         return
       }
+      if (error instanceof Error && error.message === 'TYPE_CHANGE_CONFLICT') {
+        res.status(409).json({
+          error: 'A categoria tem lançamentos de outro tipo. Mova esses lançamentos antes de trocar o tipo.',
+        })
+        return
+      }
       throw error
     }
   }
@@ -39,6 +45,10 @@ export class CategoriesController {
       }
       if (error instanceof Error && error.message === 'HAS_TRANSACTIONS') {
         res.status(409).json({ error: 'Categoria possui transações associadas' })
+        return
+      }
+      if (error instanceof Error && error.message === 'HAS_RECURRING') {
+        res.status(409).json({ error: 'Categoria é usada por uma recorrência ativa. Encerre a recorrência antes.' })
         return
       }
       throw error

@@ -8,10 +8,13 @@ import { RegisterSchema, LoginSchema, UpdateProfileSchema } from '@porquinho/typ
 const router = Router()
 const controller = new AuthController()
 
-// Freia força bruta: 10 tentativas por IP a cada 15 minutos em login/cadastro.
+// Freia força bruta: 10 tentativas que falharam por IP a cada 15 minutos em
+// login/cadastro. Logins certos não contam: quem divide a mesma rede (mesmo IP)
+// não se bloqueia só por entrar em vários aparelhos.
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   limit: 10,
+  skipSuccessfulRequests: true,
   standardHeaders: 'draft-7',
   legacyHeaders: false,
   skip: () => process.env.NODE_ENV === 'test',

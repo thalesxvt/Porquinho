@@ -9,6 +9,7 @@ const ERRORS: Record<string, [number, string]> = {
   NAME_TAKEN: [409, 'Já existe uma conta com esse nome'],
   HAS_TRANSACTIONS: [409, 'A conta possui transações. Mova ou exclua as transações antes.'],
   LAST_ACCOUNT: [409, 'Você precisa ter ao menos uma conta'],
+  HAS_RECURRING: [409, 'A conta é usada por uma recorrência ativa. Encerre a recorrência antes.'],
 }
 
 function handleKnownError(error: unknown, res: Response): boolean {

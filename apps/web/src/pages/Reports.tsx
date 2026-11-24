@@ -14,6 +14,7 @@ import {
   useAvailableMonths,
 } from '../hooks/useReports'
 import { formatCurrency } from '../lib/formatters'
+import { todayNoonIso } from '../lib/transactionStatus'
 import { KPICard } from '../components/dashboard/KPICard'
 import { ForecastCard } from '../components/dashboard/ForecastCard'
 import {
@@ -55,7 +56,8 @@ export function Reports() {
   const dateParams =
     period === 'month'
       ? { date: selectedMonthDate.toISOString() }
-      : undefined
+      : // Semana/ano: manda "hoje" no fuso local (a API está em UTC).
+        { date: todayNoonIso() }
 
   const { data: categories = [] } = useCategories()
   const { data: availableMonthsRaw = [] } = useAvailableMonths()

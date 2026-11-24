@@ -112,12 +112,15 @@ export class AccountsService {
     const account = await prisma.account.findFirst({ where: { id, userId } })
     if (!account) throw new Error('NOT_FOUND')
 
-    const [txCount, accountCount] = await Promise.all([
+    const [txCount, accountCount, activeSeries] = await Promise.all([
       prisma.transaction.count({ where: { accountId: id } }),
       prisma.account.count({ where: { userId } }),
+      // A série é apagada em cascata com a conta: a recorrência pararia sem aviso.
+      prisma.transactionSeries.count({ where: { accountId: id, active: true } }),
     ])
     if (accountCount <= 1) throw new Error('LAST_ACCOUNT')
     if (txCount > 0) throw new Error('HAS_TRANSACTIONS')
+    if (activeSeries > 0) throw new Error('HAS_RECURRING')
 
     await prisma.account.delete({ where: { id } })
   }
