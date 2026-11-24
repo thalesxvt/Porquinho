@@ -55,9 +55,11 @@ export function ProfileModal({ isOpen, onClose }: ProfileModalProps) {
         email: data.email.trim(),
       }
 
-      if (data.newPassword && data.newPassword.trim().length > 0) {
+      // A senha vai exatamente como digitada (cadastro e login também não cortam
+      // espaços), senão "abc123 " viraria "abc123" e o login depois falharia.
+      if (data.newPassword && data.newPassword.length > 0) {
         payload.currentPassword = data.currentPassword
-        payload.newPassword = data.newPassword.trim()
+        payload.newPassword = data.newPassword
       }
 
       const res = await api.put('/auth/profile', payload)

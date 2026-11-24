@@ -60,7 +60,7 @@ export function Categories() {
     reset,
     watch,
     control,
-    formState: { errors },
+    formState: { errors, dirtyFields },
   } = useForm<FormData>({
     resolver: zodResolver(schema),
     defaultValues: { type: 'EXPENSE', color: PRESET_COLORS[0], name: '' },
@@ -92,7 +92,9 @@ export function Categories() {
         await updateMutation.mutateAsync({
           id: editingCategory.id,
           name: data.name.trim(),
-          type: data.type,
+          // Categoria antiga "Ambos" aparece como Despesa no formulário: só manda o
+          // tipo se a pessoa mudou de verdade, senão ela viraria despesa em silêncio.
+          ...(editingCategory.type !== 'BOTH' || dirtyFields.type ? { type: data.type } : {}),
           color: data.color,
         })
         toast('Categoria atualizada com sucesso!', 'success')

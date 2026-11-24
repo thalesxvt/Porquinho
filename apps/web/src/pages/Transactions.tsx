@@ -1,6 +1,6 @@
 import { TransactionStatusBadges } from '../components/transactions/TransactionStatusBadges'
 import { PayButton } from '../components/transactions/PayButton'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import {
   Plus,
@@ -83,6 +83,12 @@ export function Transactions() {
   const transactions = data?.data ?? []
   const totalPages = data?.totalPages ?? 1
   const totalItems = data?.total ?? 0
+
+  // Pagar/excluir o último item da última página (ou trocar de conta) encolhe a
+  // lista: volta para a última página que existe em vez de mostrar uma vazia.
+  useEffect(() => {
+    if (data && totalPages >= 1 && page > totalPages) setPage(totalPages)
+  }, [data, page, totalPages])
 
   // Resumo do topo: somas de TODAS as transações filtradas, calculadas pela API
   // (somar só `transactions` daria o total da página atual, não do filtro)
