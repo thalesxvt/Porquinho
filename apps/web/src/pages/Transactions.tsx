@@ -1,6 +1,7 @@
 import { TransactionStatusBadges } from '../components/transactions/TransactionStatusBadges'
 import { PayButton } from '../components/transactions/PayButton'
 import { useState } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import {
   Plus,
   Pencil,
@@ -34,7 +35,12 @@ export function Transactions() {
   const [categoryId, setCategoryId] = useState('')
   const [selectedMonth, setSelectedMonth] = useState('')
   // '' = todas; PENDING = a pagar/receber; OVERDUE = atrasadas; PAID = realizadas
-  const [statusFilter, setStatusFilter] = useState<'' | 'PENDING' | 'OVERDUE' | 'PAID'>('')
+  // Links de outras telas podem abrir já filtrado (ex.: /transactions?status=PENDING).
+  const [searchParams] = useSearchParams()
+  const [statusFilter, setStatusFilter] = useState<'' | 'PENDING' | 'OVERDUE' | 'PAID'>(() => {
+    const fromUrl = searchParams.get('status')
+    return fromUrl === 'PENDING' || fromUrl === 'OVERDUE' || fromUrl === 'PAID' ? fromUrl : ''
+  })
   const [deleteTransaction, setDeleteTransaction] = useState<any>(null)
 
   const { openModal } = useTransactionModalStore()

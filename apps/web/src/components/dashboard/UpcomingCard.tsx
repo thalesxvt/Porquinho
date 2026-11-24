@@ -106,7 +106,8 @@ export function UpcomingCard({ className }: { className?: string }) {
 
       {items.length > MAX_ITEMS && (
         <Link
-          to="/transactions"
+          // Abre já em "A pagar/receber": o filtro "Todas" esconde as pendentes futuras.
+          to="/transactions?status=PENDING"
           className="flex items-center justify-center gap-1 border-t border-[#DDD7C0] py-3 text-xs font-bold text-[#5C6D7C] hover:text-[#111111] transition-colors"
         >
           Ver todas ({items.length})

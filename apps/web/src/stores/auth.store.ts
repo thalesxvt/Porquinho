@@ -23,7 +23,7 @@ interface AuthState {
   logout: () => void
 }
 
-export const useAuthStore = create<AuthState>((set) => ({
+export const useAuthStore = create<AuthState>((set, get) => ({
   user: (() => {
     try {
       const stored = localStorage.getItem('porquinho:user')
@@ -33,7 +33,9 @@ export const useAuthStore = create<AuthState>((set) => ({
   token: localStorage.getItem('porquinho:token'),
   isAuthenticated: !!localStorage.getItem('porquinho:token'),
   login: (token, user) => {
-    resetUserData()
+    // Só limpa quando entra OUTRA pessoa. O perfil também chama login() para
+    // trocar o token depois de salvar, e aí cache e conta escolhida devem ficar.
+    if (get().user?.id !== user.id) resetUserData()
     localStorage.setItem('porquinho:token', token)
     localStorage.setItem('porquinho:user', JSON.stringify(user))
     set({ token, user, isAuthenticated: true })
