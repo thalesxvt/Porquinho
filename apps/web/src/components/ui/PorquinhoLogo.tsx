@@ -77,24 +77,13 @@ export function PorquinhoLogo({
 
       {showText && (
         <div className="flex flex-col leading-none">
-          <div className="flex items-center gap-1.5">
-            <span
-              className={`font-bold tracking-tight ${
-                isWhite ? 'text-white' : 'text-zinc-950'
-              } ${textSizes[size]}`}
-            >
-              Porquinho
-            </span>
-            <span
-              className={`inline-flex items-center rounded-full px-1.5 py-0.5 text-[10px] font-semibold border ${
-                isWhite
-                  ? 'bg-white/10 text-white border-white/20'
-                  : 'bg-[#758695]/15 text-[#1B2228] border-[#758695]/25'
-              }`}
-            >
-              PRO
-            </span>
-          </div>
+          <span
+            className={`font-bold tracking-tight ${
+              isWhite ? 'text-white' : 'text-zinc-950'
+            } ${textSizes[size]}`}
+          >
+            Porquinho
+          </span>
           {subtitle && (
             <span
               className={`text-[11px] font-medium mt-1 ${
