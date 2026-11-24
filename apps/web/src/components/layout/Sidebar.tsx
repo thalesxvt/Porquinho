@@ -45,10 +45,13 @@ export function Sidebar() {
       <header className="fixed top-0 left-0 right-0 z-40 flex h-16 items-center justify-between border-b border-[#DDD7C0] bg-[#FAF8F2]/95 px-4 backdrop-blur-md md:hidden">
         <div className="flex min-w-0 items-center gap-2">
           <PorquinhoLogo size="sm" showText={false} />
-          <AccountSwitcher compact />
+          <div data-tour="account-switcher" className="min-w-0">
+            <AccountSwitcher compact />
+          </div>
         </div>
         <div className="flex shrink-0 items-center gap-1.5">
           <button
+            data-tour="new-transaction"
             onClick={() => openModal()}
             className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#111111] text-[#F1ECDA] active:scale-95 transition-all shadow-sm cursor-pointer touch-manipulation"
             aria-label="Nova transação"
@@ -56,6 +59,7 @@ export function Sidebar() {
             <Plus size={19} className="stroke-[2.5]" />
           </button>
           <button
+            data-tour="profile"
             onClick={() => setProfileOpen(true)}
             className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#E5EAEF] border border-[#DDD7C0] text-xs font-bold text-[#111111] hover:bg-[#DDD7C0] active:scale-95 transition-all cursor-pointer touch-manipulation"
             title="Meu Perfil"
@@ -82,13 +86,14 @@ export function Sidebar() {
         </div>
 
         {/* Conta ativa */}
-        <div className="px-4 pt-4">
+        <div data-tour="account-switcher" className="px-4 pt-4">
           <AccountSwitcher />
         </div>
 
         {/* Quick Action Button */}
         <div className="px-4 pt-3 pb-1">
           <button
+            data-tour="new-transaction"
             type="button"
             onClick={() => openModal()}
             className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#111111] px-4 py-2.5 text-xs font-bold text-[#F1ECDA] shadow-sm hover:bg-[#222222] active:bg-black active:scale-[0.98] transition-all cursor-pointer ring-1 ring-[#111111]"
@@ -108,7 +113,7 @@ export function Sidebar() {
               Menu Principal
             </span>
           </div>
-          <ul className="flex flex-col gap-1">
+          <ul data-tour="nav" className="flex flex-col gap-1">
             {navItems.map(({ to, icon: Icon, label }) => (
               <li key={to}>
                 <NavLink
@@ -146,7 +151,7 @@ export function Sidebar() {
 
         {/* User profile footer */}
         <div className="border-t border-[#DDD7C0] p-3">
-          <div className="flex items-center gap-2.5 rounded-xl border border-[#DDD7C0] bg-[#F1ECDA] p-2.5">
+          <div data-tour="profile" className="flex items-center gap-2.5 rounded-xl border border-[#DDD7C0] bg-[#F1ECDA] p-2.5">
             <button
               onClick={() => setProfileOpen(true)}
               className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[#111111] text-xs font-bold text-[#F1ECDA] shadow-xs ring-1 ring-[#758695]/30 hover:bg-[#222222] active:scale-95 transition-all cursor-pointer"
@@ -194,7 +199,7 @@ export function Sidebar() {
       />
 
       {/* Mobile Bottom Navigation Dock */}
-      <nav className="fixed bottom-0 left-0 right-0 z-40 grid grid-cols-5 items-center border-t border-[#DDD7C0] bg-[#FAF8F2]/95 px-1 pt-1.5 pb-[max(0.6rem,env(safe-area-inset-bottom))] backdrop-blur-md md:hidden shadow-lg">
+      <nav data-tour="nav" className="fixed bottom-0 left-0 right-0 z-40 grid grid-cols-5 items-center border-t border-[#DDD7C0] bg-[#FAF8F2]/95 px-1 pt-1.5 pb-[max(0.6rem,env(safe-area-inset-bottom))] backdrop-blur-md md:hidden shadow-lg">
         {navItems.slice(0, 2).map(({ to, icon: Icon, label }) => (
           <NavLink
             key={to}

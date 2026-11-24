@@ -8,7 +8,9 @@ import { Button } from '../ui/Button'
 import { useAuthStore } from '../../stores/auth.store'
 import { api } from '../../lib/api'
 import { useToast } from '../ui/Toast'
-import { User, Mail, Lock, ShieldCheck } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
+import { useTourStore } from '../../stores/tour.store'
+import { User, Mail, Lock, ShieldCheck, Compass } from 'lucide-react'
 
 interface ProfileModalProps {
   isOpen: boolean
@@ -20,6 +22,14 @@ export function ProfileModal({ isOpen, onClose }: ProfileModalProps) {
   const { toast } = useToast()
   const [loading, setLoading] = useState(false)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
+  const startTour = useTourStore((s) => s.start)
+  const navigate = useNavigate()
+
+  const handleReplayTour = () => {
+    onClose()
+    navigate('/')
+    startTour()
+  }
 
   const {
     register,
@@ -154,6 +164,16 @@ export function ProfileModal({ isOpen, onClose }: ProfileModalProps) {
 
         {/* Action Buttons */}
         <div className="mt-2 flex items-center justify-end gap-2 pt-3 border-t border-[#DDD7C0]">
+          <Button
+            type="button"
+            variant="ghost"
+            onClick={handleReplayTour}
+            disabled={loading}
+            leftIcon={<Compass size={15} />}
+            className="mr-auto"
+          >
+            Rever tutorial
+          </Button>
           <Button
             type="button"
             variant="outline"

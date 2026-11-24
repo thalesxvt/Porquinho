@@ -36,6 +36,11 @@ export class AuthController {
     res.json({ data: user })
   }
 
+  async completeOnboarding(req: AuthRequest, res: Response): Promise<void> {
+    const user = await service.completeOnboarding(req.userId!)
+    res.json({ data: user })
+  }
+
   async updateProfile(req: AuthRequest, res: Response): Promise<void> {
     try {
       const result = await service.updateProfile(req.userId!, req.body)

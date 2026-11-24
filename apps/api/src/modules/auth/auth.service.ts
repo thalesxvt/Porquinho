@@ -1,8 +1,8 @@
 import bcrypt from 'bcryptjs'
 import { prisma } from '../../lib/prisma'
 import { signToken } from '../../utils/jwt'
-import type { RegisterInput, LoginInput, AuthResponse, UpdateProfileInput } from '@porquinho/types'
-import { CategoryType } from '@prisma/client'
+import type { RegisterInput, LoginInput, AuthResponse, AuthUser, UpdateProfileInput } from '@porquinho/types'
+import { CategoryType, type User } from '@prisma/client'
 import { DEFAULT_ACCOUNT } from '../accounts/accounts.service'
 
 const DEFAULT_CATEGORIES: Array<{
@@ -28,6 +28,15 @@ const DEFAULT_CATEGORIES: Array<{
   { name: 'Ações',         type: 'INVESTMENT', color: '#6366f1', icon: 'TrendingUp' },
   { name: 'Outros',        type: 'INVESTMENT', color: '#6b7280', icon: 'MoreHorizontal' },
 ]
+
+function toAuthUser(user: User): AuthUser {
+  return {
+    id: user.id,
+    name: user.name,
+    email: user.email,
+    onboardingCompletedAt: user.onboardingCompletedAt?.toISOString() ?? null,
+  }
+}
 
 export class AuthService {
   async register(input: RegisterInput): Promise<AuthResponse> {
@@ -62,7 +71,7 @@ export class AuthService {
 
     return {
       token,
-      user: { id: user.id, name: user.name, email: user.email },
+      user: toAuthUser(user),
     }
   }
 
@@ -82,13 +91,13 @@ export class AuthService {
 
     return {
       token,
-      user: { id: user.id, name: user.name, email: user.email },
+      user: toAuthUser(user),
     }
   }
 
   async me(userId: string) {
     const user = await prisma.user.findUniqueOrThrow({ where: { id: userId } })
-    return { id: user.id, name: user.name, email: user.email }
+    return toAuthUser(user)
   }
 
   async updateProfile(userId: string, input: UpdateProfileInput): Promise<AuthResponse> {
@@ -129,11 +138,15 @@ export class AuthService {
 
     return {
       token,
-      user: {
-        id: updated.id,
-        name: updated.name,
-        email: updated.email,
-      },
+      user: toAuthUser(updated),
     }
+  }
+
+  async completeOnboarding(userId: string): Promise<AuthUser> {
+    const user = await prisma.user.update({
+      where: { id: userId },
+      data: { onboardingCompletedAt: new Date() },
+    })
+    return toAuthUser(user)
   }
 }

@@ -118,7 +118,7 @@ export function Dashboard() {
       )}
 
       {/* KPI Cards Grid */}
-      <div className="mb-6 grid grid-cols-2 gap-3.5 sm:gap-4 lg:grid-cols-4">
+      <div data-tour="kpis" className="mb-6 grid grid-cols-2 gap-3.5 sm:gap-4 lg:grid-cols-4">
         {summaryLoading ? (
           <>
             <KPICardSkeleton />
@@ -161,7 +161,7 @@ export function Dashboard() {
       </div>
 
       {/* Contas a pagar/receber e previsão de saldo */}
-      <div className="mb-6 grid grid-cols-1 gap-5 lg:grid-cols-3">
+      <div data-tour="upcoming" className="mb-6 grid grid-cols-1 gap-5 lg:grid-cols-3">
         <ForecastCard className="lg:col-span-2" />
         <UpcomingCard />
       </div>

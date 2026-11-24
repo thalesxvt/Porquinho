@@ -21,6 +21,7 @@ const authLimiter = rateLimit({
 router.post('/register', authLimiter, validate(RegisterSchema), (req, res) => controller.register(req, res))
 router.post('/login', authLimiter, validate(LoginSchema), (req, res) => controller.login(req, res))
 router.get('/me', authenticate, (req, res) => controller.me(req as any, res))
+router.post('/onboarding/complete', authenticate, (req, res) => controller.completeOnboarding(req as any, res))
 router.put('/profile', authenticate, validate(UpdateProfileSchema), (req, res) => controller.updateProfile(req as any, res))
 
 export { router as authRoutes }

@@ -1,16 +1,13 @@
 import { create } from 'zustand'
-
-interface AuthUser {
-  id: string
-  name: string
-  email: string
-}
+import type { AuthUser } from '@porquinho/types'
 
 interface AuthState {
   user: AuthUser | null
   token: string | null
   isAuthenticated: boolean
   login: (token: string, user: AuthUser) => void
+  /** Atualiza só os dados do usuário (sem trocar o token). */
+  setUser: (user: AuthUser) => void
   logout: () => void
 }
 
@@ -27,6 +24,10 @@ export const useAuthStore = create<AuthState>((set) => ({
     localStorage.setItem('porquinho:token', token)
     localStorage.setItem('porquinho:user', JSON.stringify(user))
     set({ token, user, isAuthenticated: true })
+  },
+  setUser: (user) => {
+    localStorage.setItem('porquinho:user', JSON.stringify(user))
+    set({ user })
   },
   logout: () => {
     localStorage.removeItem('porquinho:token')

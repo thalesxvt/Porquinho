@@ -52,6 +52,10 @@
   - Análise profunda por categoria, evolução mensal e divisão semanal.
   - Filtro por categoria específica e navegação por meses dinâmicos.
 
+- **🧭 Tutorial de boas-vindas:**
+  - Tour guiado no primeiro acesso que destaca os elementos reais da tela (conta, nova transação, resumo, previsão e menu), no desktop e no mobile.
+  - Exibido uma única vez por usuário (estado salvo no servidor); pode ser revisto a qualquer momento em **Meu Perfil → Rever tutorial**.
+
 - **📱 Design System & PWA Mobile-First:**
   - Identidade visual quente e editorial baseada na paleta *Warm Ivory & Obsidian/Charcoal*.
   - **PWA (Progressive Web App):** configurado com Web App Manifest (`manifest.json`), ícones de alta resolução e splash screens para instalação como aplicativo nativo na tela inicial de smartphones (iOS e Android).

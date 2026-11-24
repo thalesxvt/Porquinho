@@ -26,6 +26,7 @@ Controle financeiro pessoal direto, visual e rápido. Em vez de ferramentas banc
 - **Contas a pagar/receber:** Lançamentos com status Pendente (data = vencimento) ou Pago; pagamento em 1 toque.
 - **Parcelas e recorrentes:** Compras parceladas e lançamentos mensais recorrentes geram ocorrências individuais, editáveis uma a uma ou "esta e as próximas".
 - **Subcontas:** Carteiras separadas (ex.: conta principal, VR, outro banco), com saldo e relatórios próprios.
+- **Onboarding:** Tour guiado no primeiro acesso (uma vez por usuário, salvo no servidor em `User.onboardingCompletedAt`), revisável pelo perfil.
 - **Painel de Controle:** Cards de KPI em tempo real (Saldo atual, Receitas, Despesas, Investimentos), próximos vencimentos e previsão de saldo mês a mês com alerta de saldo negativo.
 - **Relatórios & Gráficos:** Filtros temporais (semana, mês, ano), evolução mensal anual e divisão de despesas por categoria (Recharts).
 - **Categorias:** Gerenciamento customizado de categorias com nomes e paletas de cores distintas.

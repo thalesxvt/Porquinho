@@ -26,6 +26,8 @@ export interface AuthUser {
   id: string
   name: string
   email: string
+  /** ISO; null enquanto o usuário não concluiu o tour de boas-vindas. */
+  onboardingCompletedAt: string | null
 }
 
 export interface AuthResponse {

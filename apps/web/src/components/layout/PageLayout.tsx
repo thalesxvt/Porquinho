@@ -2,6 +2,10 @@ import React, { useEffect } from 'react'
 import { Sidebar } from './Sidebar'
 import { TransactionModal } from '../transactions/TransactionModal'
 import { useTransactionModalStore } from '../../stores/transactionModal.store'
+import { useLocation } from 'react-router-dom'
+import { useAuthStore } from '../../stores/auth.store'
+import { useTourStore } from '../../stores/tour.store'
+import { Tour } from '../onboarding/Tour'
 
 interface PageLayoutProps {
   children: React.ReactNode
@@ -9,6 +13,15 @@ interface PageLayoutProps {
 
 export function PageLayout({ children }: PageLayoutProps) {
   const { isOpen, closeModal, editData, openModal } = useTransactionModalStore()
+  const tourOpen = useTourStore((s) => s.isOpen)
+  const startTour = useTourStore((s) => s.start)
+  const needsOnboarding = useAuthStore((s) => s.user?.onboardingCompletedAt === null)
+  const { pathname } = useLocation()
+
+  // Primeiro acesso: abre o tour no Dashboard (onde ficam todos os elementos que ele aponta).
+  useEffect(() => {
+    if (needsOnboarding && pathname === '/') startTour()
+  }, [needsOnboarding, pathname, startTour])
 
   // Global keyboard shortcut: press 'n' or 'N' (when not typing in an input) to trigger quick transaction
   useEffect(() => {
@@ -18,7 +31,8 @@ export function PageLayout({ children }: PageLayoutProps) {
         !['INPUT', 'TEXTAREA', 'SELECT'].includes((e.target as HTMLElement)?.tagName) &&
         !e.ctrlKey &&
         !e.metaKey &&
-        !isOpen
+        !isOpen &&
+        !tourOpen
       ) {
         e.preventDefault()
         openModal()
@@ -27,7 +41,7 @@ export function PageLayout({ children }: PageLayoutProps) {
 
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [openModal, isOpen])
+  }, [openModal, isOpen, tourOpen])
 
   return (
     <div className="min-h-[100dvh] bg-[#F1ECDA] flex flex-col antialiased selection:bg-[#111111] selection:text-[#F1ECDA]">
@@ -44,6 +58,8 @@ export function PageLayout({ children }: PageLayoutProps) {
         onClose={closeModal}
         transaction={editData}
       />
+
+      <Tour />
     </div>
   )
 }
