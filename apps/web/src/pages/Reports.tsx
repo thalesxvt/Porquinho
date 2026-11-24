@@ -87,7 +87,8 @@ export function Reports() {
   }))
 
   const weeklyChartData = weekly.map((w: any) => ({
-    name: `Sem. ${w.week}`,
+    // A API já manda "Semana 1": encurta para "Sem. 1" (cabe no eixo do celular).
+    name: String(w.week).replace('Semana', 'Sem.'),
     Receitas: w.totalIncome / 100,
     Despesas: w.totalExpense / 100,
     Investimentos: (w.totalInvested ?? 0) / 100,
@@ -144,18 +145,20 @@ export function Reports() {
               value={summary.balance}
               previousValue={summary.previousBalance}
               variant={summary.balance >= 0 ? 'balance' : 'expense'}
+              // Vermelho quando negativo, mas caixa caindo é sempre ruim.
+              lowerIsBetter={false}
               icon={<Wallet size={19} />}
               subtext={
                 period === 'month' ? (
                   <div className="flex flex-col gap-0.5 text-[11px] leading-tight">
                     {summary.rolloverBalance !== 0 && (
                       <span>
-                        Sobra anterior: <strong>{formatCurrency(summary.rolloverBalance)}</strong>
+                        Sobra anterior: <strong className="whitespace-nowrap">{formatCurrency(summary.rolloverBalance)}</strong>
                       </span>
                     )}
                     <span>
                       Resultado do mês:{' '}
-                      <strong className={summary.monthBalance >= 0 ? 'text-emerald-600' : 'text-rose-600'}>
+                      <strong className={`whitespace-nowrap ${summary.monthBalance >= 0 ? 'text-emerald-600' : 'text-rose-600'}`}>
                         {summary.monthBalance >= 0 ? '+' : ''}{formatCurrency(summary.monthBalance)}
                       </strong>
                     </span>
@@ -399,12 +402,13 @@ export function Reports() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
         {/* Weekly Cashflow */}
         <Card className="overflow-hidden flex flex-col justify-between">
-          <CardHeader className="border-b border-[#DDD7C0] pb-3">
+          {/* No celular a legenda desce para baixo do título (e pode quebrar linha). */}
+          <CardHeader className="border-b border-[#DDD7C0] pb-3 flex-col sm:flex-row items-start sm:items-center gap-2">
             <div>
               <CardTitle>Fluxo Semanal ({queryMonth}/{queryYear})</CardTitle>
               <CardDescription>Detalhamento por semana do mês selecionado</CardDescription>
             </div>
-            <div className="flex items-center gap-2.5 text-xs font-bold">
+            <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1 text-xs font-bold">
               <span className="inline-flex items-center gap-1.5 text-[#5C6D7C]">
                 <span className="h-2 w-2 rounded-full bg-emerald-500" />
                 Receitas

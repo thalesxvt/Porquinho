@@ -10,6 +10,11 @@ export interface KPICardProps {
   value: number
   previousValue?: number
   variant?: KPIVariant
+  /**
+   * Se diminuir é bom (despesas). Padrão: só no variant "expense". O caixa negativo
+   * usa o visual "expense" (vermelho), mas para ele cair continua sendo ruim.
+   */
+  lowerIsBetter?: boolean
   icon?: ReactNode
   badgeText?: string
   subtext?: ReactNode
@@ -58,6 +63,7 @@ export function KPICard({
   value,
   previousValue,
   variant = 'default',
+  lowerIsBetter = variant === 'expense',
   icon,
   badgeText,
   subtext,
@@ -73,8 +79,8 @@ export function KPICard({
   const isNegative = change < 0
 
   // For expense, a decrease is favorable (saving money)
-  const isFavorable = variant === 'expense' ? isNegative : isPositive
-  const isUnfavorable = variant === 'expense' ? isPositive : isNegative
+  const isFavorable = lowerIsBetter ? isNegative : isPositive
+  const isUnfavorable = lowerIsBetter ? isPositive : isNegative
 
   return (
     <div
@@ -125,9 +131,10 @@ export function KPICard({
             {customFooter}
           </div>
         ) : previousIsZero ? (
-          <div className="mt-4 flex items-center gap-1.5 pt-3 border-t border-[#DDD7C0] text-[11px] text-[#758695] font-medium">
-            <Minus size={12} className="stroke-[2.5] shrink-0" />
-            <span className="truncate">Sem movimento no período anterior</span>
+          <div className="mt-4 flex items-start gap-1.5 pt-3 border-t border-[#DDD7C0] text-[11px] leading-snug text-[#758695] font-medium">
+            <Minus size={12} className="stroke-[2.5] shrink-0 mt-0.5" />
+            {/* Quebra linha em vez de cortar: nos cards estreitos do celular não cabe numa linha. */}
+            <span>Sem movimento no período anterior</span>
           </div>
         ) : hasComparison ? (
           <div className="mt-4 flex items-center gap-2 pt-3 border-t border-[#DDD7C0] text-xs">
