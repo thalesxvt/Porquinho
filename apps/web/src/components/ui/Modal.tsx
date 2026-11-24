@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react'
+import React, { useEffect } from 'react'
 import { X } from 'lucide-react'
 import { cn } from '../../lib/utils'
 
@@ -26,7 +26,6 @@ export function Modal({
   children,
   size = 'md',
 }: ModalProps) {
-  const overlayRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     const handleKey = (e: KeyboardEvent) => {
@@ -46,17 +45,18 @@ export function Modal({
 
   return (
     <div
-      ref={overlayRef}
       role="dialog"
       aria-modal="true"
       aria-label={title}
       className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 animate-fade-in"
-      onClick={(e) => {
-        if (e.target === overlayRef.current) onClose()
-      }}
     >
-      {/* Backdrop */}
-      <div className="fixed inset-0 bg-zinc-950/50 backdrop-blur-xs transition-opacity" />
+      {/* Backdrop — o clique fica aqui (e não no contêiner) porque o navegador
+          só dispara click no fundo quando o mouse foi apertado E solto nele.
+          Arrastar pra selecionar texto num campo e soltar fora não fecha. */}
+      <div
+        className="fixed inset-0 bg-zinc-950/50 backdrop-blur-xs transition-opacity"
+        onClick={onClose}
+      />
 
       {/* Modal Dialog Box */}
       <div
