@@ -38,7 +38,10 @@ import {
 
 export function Dashboard() {
   const [period, setPeriod] = useState<Period>('month')
-  const [selectedMonthDate, setSelectedMonthDate] = useState<Date>(new Date(2026, 10, 1))
+  const [selectedMonthDate, setSelectedMonthDate] = useState<Date>(() => {
+    const now = new Date()
+    return new Date(now.getFullYear(), now.getMonth(), 1)
+  })
   const { openModal } = useTransactionModalStore()
 
   const dateParams =

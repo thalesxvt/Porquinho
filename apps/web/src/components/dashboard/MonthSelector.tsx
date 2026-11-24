@@ -1,5 +1,5 @@
 import { ChevronLeft, ChevronRight, Calendar } from 'lucide-react'
-import { format, addMonths, subMonths } from 'date-fns'
+import { format, addMonths, subMonths, startOfMonth } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 
 interface MonthSelectorProps {
@@ -24,13 +24,10 @@ export function MonthSelector({
   const monthLabel = format(selectedDate, "MMMM 'de' yyyy", { locale: ptBR })
   const formattedLabel = monthLabel.charAt(0).toUpperCase() + monthLabel.slice(1)
 
-  // Quick preset months (e.g. Ago/26, Set/26, Out/26, Nov/26)
-  const defaultMonths = availableMonths || [
-    new Date(2026, 7, 1),  // Agosto
-    new Date(2026, 8, 1),  // Setembro
-    new Date(2026, 9, 1),  // Outubro
-    new Date(2026, 10, 1), // Novembro
-  ]
+  // Sem transações pagas ainda: mostra os últimos 4 meses até o atual
+  const currentMonth = startOfMonth(new Date())
+  const defaultMonths =
+    availableMonths || [3, 2, 1, 0].map((n) => subMonths(currentMonth, n))
 
   const isCurrentMonth =
     format(selectedDate, 'yyyy-MM') === format(new Date(), 'yyyy-MM')
