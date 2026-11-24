@@ -50,6 +50,8 @@ model Account {
   id           String              @id @default(cuid())
   name         String
   color        String
+  // Saldo que a conta já tinha antes do primeiro lançamento (pode ser negativo).
+  initialBalanceCents Int          @default(0)
   userId       String
   user         User                @relation(fields: [userId], references: [id], onDelete: Cascade)
   transactions Transaction[]

@@ -62,23 +62,29 @@ async function getTotals(userId: string, accountId: string, start: Date, end: Da
   return { income, expense, invested, balance: income - expense - invested }
 }
 
-/** Saldo realizado (só PAID) antes de `beforeDate`, ou de todo o histórico se omitida. */
+/**
+ * Saldo realizado (só PAID) antes de `beforeDate`, ou de todo o histórico se omitida.
+ * Inclui o saldo inicial da conta, que vale desde antes do primeiro lançamento.
+ */
 async function getPriorBalance(userId: string, accountId: string, beforeDate?: Date) {
-  const result = await prisma.transaction.groupBy({
-    by: ['type'],
-    where: {
-      userId,
-      accountId,
-      status: 'PAID',
-      ...(beforeDate && { date: { lt: beforeDate } }),
-    },
-    _sum: { amountCents: true },
-  })
+  const [result, account] = await Promise.all([
+    prisma.transaction.groupBy({
+      by: ['type'],
+      where: {
+        userId,
+        accountId,
+        status: 'PAID',
+        ...(beforeDate && { date: { lt: beforeDate } }),
+      },
+      _sum: { amountCents: true },
+    }),
+    prisma.account.findFirst({ where: { id: accountId, userId }, select: { initialBalanceCents: true } }),
+  ])
 
   const income = result.find((r) => r.type === 'INCOME')?._sum.amountCents ?? 0
   const expense = result.find((r) => r.type === 'EXPENSE')?._sum.amountCents ?? 0
   const invested = result.find((r) => r.type === 'INVESTMENT')?._sum.amountCents ?? 0
-  return income - expense - invested
+  return (account?.initialBalanceCents ?? 0) + income - expense - invested
 }
 
 export class ReportsService {

@@ -20,7 +20,7 @@ import {
   useDeleteAccount,
 } from '../hooks/useAccounts'
 import { useAccountStore } from '../stores/account.store'
-import { formatCurrency } from '../lib/formatters'
+import { formatCurrency, toCents, centsToFloat } from '../lib/formatters'
 import { cn } from '../lib/utils'
 
 const PRESET_COLORS = [
@@ -41,6 +41,11 @@ const PRESET_COLORS = [
 const schema = z.object({
   name: z.string().trim().min(1, 'Nome é obrigatório').max(40),
   color: z.string().regex(/^#[0-9A-Fa-f]{6}$/, 'Cor inválida'),
+  // Vazio = zero. O sinal fica num checkbox: o teclado numérico do celular não tem "-".
+  initialBalance: z
+    .string()
+    .refine((v) => v.trim() === '' || /^(R\$)?\s*\d[\d.]*(,\d{0,2})?$|^\d+(\.\d{0,2})?$/.test(v.trim()), 'Valor inválido'),
+  initialNegative: z.boolean(),
 })
 
 type FormData = z.infer<typeof schema>
@@ -59,18 +64,23 @@ export function Accounts() {
 
   const { register, handleSubmit, reset, control, formState: { errors } } = useForm<FormData>({
     resolver: zodResolver(schema),
-    defaultValues: { name: '', color: PRESET_COLORS[1] },
+    defaultValues: { name: '', color: PRESET_COLORS[1], initialBalance: '', initialNegative: false },
   })
 
   const openCreate = () => {
     setEditing(null)
-    reset({ name: '', color: PRESET_COLORS[1] })
+    reset({ name: '', color: PRESET_COLORS[1], initialBalance: '', initialNegative: false })
     setModalOpen(true)
   }
 
   const openEdit = (a: Account) => {
     setEditing(a)
-    reset({ name: a.name, color: a.color })
+    reset({
+      name: a.name,
+      color: a.color,
+      initialBalance: a.initialBalanceCents ? centsToFloat(Math.abs(a.initialBalanceCents)) : '',
+      initialNegative: a.initialBalanceCents < 0,
+    })
     setModalOpen(true)
   }
 
@@ -82,13 +92,15 @@ export function Accounts() {
   const errorMessage = (err: any, fallback: string) =>
     err?.response?.data?.error || err?.response?.data?.message || fallback
 
-  const handleSave = async (data: FormData) => {
+  const handleSave = async ({ initialBalance, initialNegative, ...data }: FormData) => {
+    const cents = Math.abs(toCents(initialBalance || '0'))
+    const payload = { ...data, initialBalanceCents: initialNegative ? -cents : cents }
     try {
       if (editing) {
-        await updateMutation.mutateAsync({ id: editing.id, ...data })
+        await updateMutation.mutateAsync({ id: editing.id, ...payload })
         toast('Conta atualizada!', 'success')
       } else {
-        const created = await createMutation.mutateAsync(data)
+        const created = await createMutation.mutateAsync(payload)
         // Quem cria uma conta quase sempre quer começar a lançar nela.
         selectAccount(created.id)
         toast(`Conta "${created.name}" criada e selecionada.`, 'success')
@@ -228,8 +240,8 @@ export function Accounts() {
         title={editing ? 'Editar conta' : 'Nova conta'}
         description={
           editing
-            ? 'Altere o nome ou a cor da conta.'
-            : 'Ex.: VR, VA, Nubank, Carteira. O saldo começa em zero; lance uma receita para o saldo inicial.'
+            ? 'Altere o nome, a cor ou o saldo inicial da conta.'
+            : 'Ex.: VR, VA, Nubank, Carteira. Informe quanto já existe nela hoje.'
         }
         size="md"
       >
@@ -240,6 +252,27 @@ export function Accounts() {
             error={errors.name?.message}
             {...register('name')}
           />
+
+          <div>
+            <Input
+              label="Saldo inicial (opcional)"
+              placeholder="0,00"
+              inputMode="decimal"
+              error={errors.initialBalance?.message}
+              {...register('initialBalance')}
+            />
+            <label className="mt-2 flex items-center gap-2 text-xs font-medium text-slate-600 cursor-pointer">
+              <input
+                type="checkbox"
+                className="h-4 w-4 rounded border-slate-300 accent-[#111111] cursor-pointer"
+                {...register('initialNegative')}
+              />
+              Saldo negativo (ex.: cheque especial)
+            </label>
+            <p className="mt-1.5 text-xs text-[#758695]">
+              Quanto a conta já tinha antes do primeiro lançamento. Não conta como receita nos relatórios.
+            </p>
+          </div>
 
           <div>
             <label className="mb-2 block text-xs font-bold text-slate-700">Cor de identificação</label>

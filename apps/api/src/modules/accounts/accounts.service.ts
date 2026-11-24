@@ -65,7 +65,8 @@ export class AccountsService {
         id: a.id,
         name: a.name,
         color: a.color,
-        balanceCents: sum('INCOME') - sum('EXPENSE') - sum('INVESTMENT'),
+        initialBalanceCents: a.initialBalanceCents,
+        balanceCents: a.initialBalanceCents + sum('INCOME') - sum('EXPENSE') - sum('INVESTMENT'),
         transactionCount: counts.find((c) => c.accountId === a.id)?._count ?? 0,
         isDefault: index === 0,
         createdAt: a.createdAt.toISOString(),
@@ -75,7 +76,14 @@ export class AccountsService {
 
   async create(userId: string, input: CreateAccountInput) {
     try {
-      return await prisma.account.create({ data: { name: input.name.trim(), color: input.color, userId } })
+      return await prisma.account.create({
+        data: {
+          name: input.name.trim(),
+          color: input.color,
+          initialBalanceCents: input.initialBalanceCents ?? 0,
+          userId,
+        },
+      })
     } catch (e) {
       if (isUniqueViolation(e)) throw new Error('NAME_TAKEN')
       throw e
@@ -91,6 +99,7 @@ export class AccountsService {
         data: {
           ...(input.name !== undefined && { name: input.name.trim() }),
           ...(input.color !== undefined && { color: input.color }),
+          ...(input.initialBalanceCents !== undefined && { initialBalanceCents: input.initialBalanceCents }),
         },
       })
     } catch (e) {

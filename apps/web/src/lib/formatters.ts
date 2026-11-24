@@ -54,8 +54,12 @@ export function formatDateLong(dateString: string): string {
 
 export function toCents(value: string | number): number {
   if (typeof value === 'number') return Math.round(value * 100)
-  // Accepts "149.90", "149,90", "R$ 149,90"
-  const cleaned = value.replace(/[^\d.,-]/g, '').replace(',', '.')
+  // Accepts "149.90", "149,90", "R$ 149,90", "1.500,00"
+  let cleaned = value.replace(/[^\d.,-]/g, '')
+  // Com vírgula, ela é o decimal e os pontos são separadores de milhar.
+  if (cleaned.includes(',')) cleaned = cleaned.replace(/\./g, '').replace(',', '.')
+  // Sem vírgula, "1.500" ou "1.500.000" (grupos de 3) também é milhar.
+  else if (/^-?\d{1,3}(\.\d{3})+$/.test(cleaned)) cleaned = cleaned.replace(/\./g, '')
   const num = parseFloat(cleaned)
   return isNaN(num) ? 0 : Math.round(num * 100)
 }

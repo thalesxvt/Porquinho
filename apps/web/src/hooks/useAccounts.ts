@@ -33,7 +33,7 @@ function useInvalidateAll() {
 export function useCreateAccount() {
   const invalidate = useInvalidateAll()
   return useMutation({
-    mutationFn: async (input: { name: string; color: string }) => {
+    mutationFn: async (input: { name: string; color: string; initialBalanceCents?: number }) => {
       const { data } = await api.post('/accounts', input)
       return data.data
     },
@@ -44,7 +44,7 @@ export function useCreateAccount() {
 export function useUpdateAccount() {
   const invalidate = useInvalidateAll()
   return useMutation({
-    mutationFn: async ({ id, ...input }: { id: string; name?: string; color?: string }) => {
+    mutationFn: async ({ id, ...input }: { id: string; name?: string; color?: string; initialBalanceCents?: number }) => {
       const { data } = await api.put(`/accounts/${id}`, input)
       return data.data
     },
