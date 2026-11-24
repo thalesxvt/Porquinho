@@ -5,7 +5,7 @@
 ![Versão](https://img.shields.io/badge/vers%C3%A3o-1.0.0-emerald)
 ![Node](https://img.shields.io/badge/node-%3E%3D20-blue)
 ![React](https://img.shields.io/badge/react-19-cyan)
-![TypeScript](https://img.shields.io/badge/typescript-5-blue)
+![TypeScript](https://img.shields.io/badge/typescript-strict-blue)
 ![PostgreSQL](https://img.shields.io/badge/database-postgresql-indigo)
 ![Segurança](https://img.shields.io/badge/seguran%C3%A7a-AES--256--GCM-emerald)
 ![PWA](https://img.shields.io/badge/pwa-instal%C3%A1vel-rose)
@@ -17,14 +17,15 @@
 
 - **📊 Dashboard Executivo:**
   - Métricas principais em tempo real: Total em Caixa / Saldo Total, Receitas Recebidas, Despesas Realizadas e Investimentos acumulados.
-  - Seletor de período dinâmico (Hoje, 7 Dias, Mês e Ano) com navegação inteligente pelos meses que possuem registros históricos.
+  - Seletor de período (Semana, Mês e Ano). No modo mês, setas para qualquer mês e atalhos para o mês atual e os 5 meses mais recentes com movimentação.
   - Gráfico de distribuição percentual de despesas por categoria e evolução anual de receitas vs. despesas.
   - Tabela analítica e lista de transações recentes com formatação monetária e temporal precisa.
 
 - **💸 Gestão Completa de Transações:**
   - Lançamento ágil de receitas e despesas com modal de atalho rápido.
-  - Filtros combinados por tipo (Todas, Receitas, Despesas), categoria, mês dinâmico e busca textual por descrição.
-  - Paginação completa de lançamentos com contagem de registros.
+  - Filtros combinados por tipo (Todos, Despesas, Receitas, Investimentos), situação (Todas, Realizadas, A pagar/receber, Atrasadas), categoria, mês e busca textual por descrição.
+  - Resumo do filtro (registros, receitas, despesas e investimentos) somando **todas** as páginas, não só a visível.
+  - Paginação completa de lançamentos; o filtro de situação também pode vir no link (ex.: `/transactions?status=PENDING`).
   - Otimização para smartphone: campos de valor abrem teclado numérico nativo (`inputMode="decimal"`).
   - Edição ágil e exclusão de transações com modal de confirmação segura.
 
@@ -44,12 +45,13 @@
 
 - **🏷️ Gestão Flexível de Categorias:**
   - Categorização com paleta de cores para identificação visual imediata.
-  - Suporte a categorias para Despesas, Receitas ou Ambos.
-  - Total liberdade de gerenciamento: crie, edite e exclua qualquer categoria (inclusive as iniciais), com proteção de integridade relacional caso haja transações vinculadas.
+  - Cada categoria é de Despesa, Receita ou Investimento ("Ambos" existe só em categorias antigas). Uma transação só aceita categoria do mesmo tipo.
+  - Crie, edite e exclua qualquer categoria (inclusive as iniciais), com proteções: nome único por tipo, sem trocar o tipo de uma categoria que já tem lançamentos de outro tipo, e sem excluir categoria com transações ou recorrência ativa.
 
 - **📈 Relatórios e Analytics:**
   - Gráficos interativos com alternância de visualização (Barras vs. Área preenchida).
   - Análise profunda por categoria, evolução mensal e divisão semanal.
+  - Comparação de cada indicador com o período anterior (o saldo é comparado com o saldo acumulado no fim do período anterior).
   - Filtro por categoria específica e navegação por meses dinâmicos.
 
 - **🧭 Tutorial de boas-vindas:**
@@ -64,8 +66,9 @@
 
 - **🔒 Segurança Máxima & Privacidade:**
   - **Field-Level Encryption (FLE):** As descrições das transações são criptografadas em repouso com algoritmo autenticado **AES-256-GCM** antes de serem salvas no banco de dados, protegendo a confidencialidade do usuário mesmo em caso de vazamento de dados.
-  - Autenticação stateless via JWT com expiração segura e hash de senhas via `bcryptjs`.
-  - Limite de tentativas de login/cadastro por IP (`express-rate-limit`) contra força bruta.
+  - Autenticação stateless via JWT com expiração segura e hash de senhas via `bcryptjs`. E-mail sem diferenciar maiúsculas/minúsculas.
+  - Limite de tentativas de login/cadastro por IP (`express-rate-limit`) contra força bruta: só tentativas que falharam contam, então quem divide a mesma rede não se bloqueia ao entrar em vários aparelhos.
+  - Ao entrar ou sair, o cache local é limpo: quem usa o mesmo aparelho depois não vê dados da pessoa anterior.
   - Rotas protegidas no frontend e middleware de autenticação no backend.
   - Cabeçalhos de segurança HTTP via `helmet` e CORS restrito à URL do frontend (`FRONTEND_URL` + `CORS_EXTRA_ORIGINS`).
 
@@ -175,9 +178,11 @@ docker compose up -d
 # Aplica o schema do Prisma no banco de dados
 npm run db:push --workspace=apps/api
 
-# Popula o banco com categorias padrão
+# (Opcional) Cria um usuário de demonstração com categorias, conta "VR" e lançamentos de exemplo
 npm run db:seed --workspace=apps/api
 ```
+
+O seed cria o login **`demo@porquinho.app`** / senha **`demo123`**. Usuários criados pelo cadastro já ganham as categorias padrão e a conta "Principal" automaticamente, sem precisar do seed.
 
 *(Opcional)* Caso esteja atualizando uma base de dados legada, execute os scripts de migração:
 ```bash
@@ -211,14 +216,17 @@ Na raiz do projeto:
 | `npm run dev:web` | Inicia apenas o frontend em modo de desenvolvimento |
 | `npm run dev:api` | Inicia apenas a API backend em modo de desenvolvimento |
 | `npm run build` | Compila os tipos compartilhados, frontend e backend para produção |
-| `npm run lint` | Executa a verificação estática de código com Oxlint em todos os workspaces |
+| `npm run lint` | Executa a verificação estática de código com Oxlint nos workspaces que têm lint (hoje, o frontend) |
 | `npm run db:studio --workspace=apps/api` | Abre o Prisma Studio no navegador para gerenciar o banco |
 | `npm run db:push --workspace=apps/api` | Sincroniza o schema do Prisma diretamente com o banco |
-| `npm run db:seed --workspace=apps/api` | Executa o seed de categorias padrão no banco |
+| `npm run db:seed --workspace=apps/api` | Cria o usuário de demonstração (`demo@porquinho.app`) com dados de exemplo |
 | `npm run db:migrate --workspace=apps/api` | Cria e aplica uma migração do Prisma (desenvolvimento) |
 | `npm run db:encrypt --workspace=apps/api` | Criptografa descrições de transações legadas existentes com AES-256-GCM |
 | `npm run db:investments --workspace=apps/api` | Migra lançamentos legados de investimento para o tipo próprio `INVESTMENT` |
 | `npm run test --workspace=apps/api` | Executa os testes da API com Vitest |
+
+> [!TIP]
+> **Checagem de tipos do frontend:** em `apps/web`, use `npx tsc --noEmit -p tsconfig.app.json`. O `tsconfig.json` de lá só referencia outros arquivos (`"files": []`), então `tsc -p .` não verifica nenhum arquivo e sempre "passa". O `npm run build` já roda a checagem certa (`tsc -b`).
 
 ---
 

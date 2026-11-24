@@ -12,7 +12,7 @@
     "dev:web": "npm run dev --workspace=apps/web",
     "dev:api": "npm run dev --workspace=apps/api",
     "build": "npm run build --workspace=packages/types && npm run build --workspace=apps/web && npm run build --workspace=apps/api",
-    "lint": "npm run lint --workspaces"
+    "lint": "npm run lint --workspaces --if-present"
   },
   "devDependencies": {
     "concurrently": "^10.0.7"
