@@ -1,6 +1,6 @@
 import { TransactionStatusBadges } from '../components/transactions/TransactionStatusBadges'
 import { PayButton } from '../components/transactions/PayButton'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import {
   Plus,
@@ -26,7 +26,7 @@ import { formatCurrency, formatDateRelative, formatDate } from '../lib/formatter
 import { TableRowSkeleton } from '../components/ui/Skeleton'
 import { useTransactionModalStore } from '../stores/transactionModal.store'
 import { cn } from '../lib/utils'
-import { txStyle } from '../lib/transactionStyle'
+import { txStyle, categoryOptionLabel } from '../lib/transactionStyle'
 
 export function Transactions() {
   const [page, setPage] = useState(1)
@@ -86,9 +86,8 @@ export function Transactions() {
 
   // Pagar/excluir o último item da última página (ou trocar de conta) encolhe a
   // lista: volta para a última página que existe em vez de mostrar uma vazia.
-  useEffect(() => {
-    if (data && totalPages >= 1 && page > totalPages) setPage(totalPages)
-  }, [data, page, totalPages])
+  // Ajuste durante a renderização (padrão do React para estado derivado), sem efeito.
+  if (data && totalPages >= 1 && page > totalPages) setPage(totalPages)
 
   // Resumo do topo: somas de TODAS as transações filtradas, calculadas pela API
   // (somar só `transactions` daria o total da página atual, não do filtro)
@@ -240,7 +239,7 @@ export function Transactions() {
                 setPage(1)
               }}
               placeholder="Categorias"
-              options={categories.map((c: any) => ({ value: c.id, label: c.name }))}
+              options={categories.map((c: any) => ({ value: c.id, label: categoryOptionLabel(c, categories) }))}
             />
           </div>
         </div>

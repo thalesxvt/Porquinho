@@ -29,3 +29,18 @@ const STYLES = {
 export function txStyle(type: TxType) {
   return STYLES[type] ?? STYLES.EXPENSE
 }
+
+/**
+ * Nome da categoria para listas que misturam tipos (filtros). Quando o nome se
+ * repete, como os três "Outros" padrão, mostra o tipo junto: "Outros (receita)".
+ */
+export function categoryOptionLabel(
+  category: { name: string; type: string },
+  all: { name: string; type: string }[]
+): string {
+  const key = category.name.trim().toLowerCase()
+  const repeated = all.filter((c) => c.name.trim().toLowerCase() === key).length > 1
+  if (!repeated) return category.name
+  const typeLabel = category.type === 'BOTH' ? 'ambos' : txStyle(category.type as TxType).label.toLowerCase()
+  return `${category.name} (${typeLabel})`
+}

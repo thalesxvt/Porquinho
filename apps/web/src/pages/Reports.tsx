@@ -15,6 +15,7 @@ import {
 } from '../hooks/useReports'
 import { formatCurrency } from '../lib/formatters'
 import { todayNoonIso } from '../lib/transactionStatus'
+import { categoryOptionLabel } from '../lib/transactionStyle'
 import { KPICard } from '../components/dashboard/KPICard'
 import { ForecastCard } from '../components/dashboard/ForecastCard'
 import {
@@ -215,7 +216,7 @@ export function Reports() {
                 <option value="">Todas as categorias</option>
                 {categories.map((c: any) => (
                   <option key={c.id} value={c.id}>
-                    {c.name}
+                    {categoryOptionLabel(c, categories)}
                   </option>
                 ))}
               </select>
