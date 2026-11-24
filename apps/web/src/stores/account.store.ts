@@ -14,6 +14,8 @@ interface AccountState {
   /** Conta escolhida no seletor. Se não existir mais, a primeira conta é usada. */
   selectedAccountId: string | null
   selectAccount: (id: string) => void
+  /** Esquece a conta escolhida (ao trocar de usuário). */
+  clearSelection: () => void
 }
 
 export const useAccountStore = create<AccountState>((set) => ({
@@ -25,5 +27,13 @@ export const useAccountStore = create<AccountState>((set) => ({
       // Sem storage (aba privada etc.): a escolha vale só nesta sessão.
     }
     set({ selectedAccountId: id })
+  },
+  clearSelection: () => {
+    try {
+      localStorage.removeItem(STORAGE_KEY)
+    } catch {
+      // Sem storage: só limpa o estado em memória.
+    }
+    set({ selectedAccountId: null })
   },
 }))

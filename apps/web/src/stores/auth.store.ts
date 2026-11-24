@@ -1,5 +1,17 @@
 import { create } from 'zustand'
 import type { AuthUser } from '@porquinho/types'
+import { queryClient } from '../lib/queryClient'
+import { useAccountStore } from './account.store'
+
+/**
+ * Login e logout trocam de tela sem recarregar a página: sem isto, quem entra
+ * depois no mesmo aparelho veria por alguns minutos as contas, categorias e
+ * relatórios em cache da pessoa anterior.
+ */
+function resetUserData() {
+  queryClient.clear()
+  useAccountStore.getState().clearSelection()
+}
 
 interface AuthState {
   user: AuthUser | null
@@ -21,6 +33,7 @@ export const useAuthStore = create<AuthState>((set) => ({
   token: localStorage.getItem('porquinho:token'),
   isAuthenticated: !!localStorage.getItem('porquinho:token'),
   login: (token, user) => {
+    resetUserData()
     localStorage.setItem('porquinho:token', token)
     localStorage.setItem('porquinho:user', JSON.stringify(user))
     set({ token, user, isAuthenticated: true })
@@ -30,6 +43,7 @@ export const useAuthStore = create<AuthState>((set) => ({
     set({ user })
   },
   logout: () => {
+    resetUserData()
     localStorage.removeItem('porquinho:token')
     localStorage.removeItem('porquinho:user')
     set({ token: null, user: null, isAuthenticated: false })
