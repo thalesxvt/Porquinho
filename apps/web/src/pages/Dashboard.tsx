@@ -22,6 +22,7 @@ import { Card, CardHeader, CardTitle, CardDescription } from '../components/ui/C
 import { KPICardSkeleton, ChartSkeleton } from '../components/ui/Skeleton'
 import { useSummary, useCategoryReport, useMonthlyReport, useAvailableMonths } from '../hooks/useReports'
 import { formatCurrency } from '../lib/formatters'
+import { suggestedDateInMonth } from '../lib/transactionStatus'
 import { useTransactionModalStore } from '../stores/transactionModal.store'
 import {
   BarChart,
@@ -96,7 +97,7 @@ export function Dashboard() {
                 openModal({
                   date:
                     period === 'month'
-                      ? selectedMonthDate.toISOString().slice(0, 10)
+                      ? suggestedDateInMonth(selectedMonthDate, 1)
                       : undefined,
                 })
               }

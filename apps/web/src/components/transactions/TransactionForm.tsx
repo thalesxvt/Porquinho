@@ -69,7 +69,7 @@ export function TransactionForm({
     formState: { errors },
   } = useForm<FormData>({
     resolver: zodResolver(schema),
-    defaultValues: defaultValues
+    defaultValues: isEditing
       ? {
           description: defaultValues.description,
           amount: centsToFloat(defaultValues.amountCents),
@@ -83,7 +83,12 @@ export function TransactionForm({
         }
       : {
           type: 'EXPENSE',
-          date: format(new Date(), 'yyyy-MM-dd'),
+          // Criação pode vir com uma data sugerida ('yyyy-MM-dd'). Usamos a string
+          // direto: new Date('yyyy-MM-dd') é meia-noite UTC, e no Brasil isso
+          // ainda é o dia anterior.
+          date: defaultValues?.date
+            ? String(defaultValues.date).slice(0, 10)
+            : format(new Date(), 'yyyy-MM-dd'),
           amount: '',
           description: '',
           categoryId: '',

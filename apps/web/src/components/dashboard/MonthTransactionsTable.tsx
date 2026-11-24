@@ -23,6 +23,10 @@ import { formatCurrency, formatDate } from '../../lib/formatters'
 import { useTransactionModalStore } from '../../stores/transactionModal.store'
 import { cn } from '../../lib/utils'
 import { txStyle } from '../../lib/transactionStyle'
+import { suggestedDateInMonth } from '../../lib/transactionStatus'
+
+// Sem paginação nesta tabela: busca até este tanto e avisa se o mês tiver mais.
+const MONTH_TABLE_LIMIT = 300
 
 interface MonthTransactionsTableProps {
   selectedDate: Date
@@ -42,7 +46,7 @@ export function MonthTransactionsTable({ selectedDate }: MonthTransactionsTableP
   const { data, isLoading } = useTransactions({
     startDate: start,
     endDate: end,
-    limit: 100,
+    limit: MONTH_TABLE_LIMIT,
     search: search.trim() || undefined,
     type: filterType || undefined,
   })
@@ -51,6 +55,9 @@ export function MonthTransactionsTable({ selectedDate }: MonthTransactionsTableP
   const { data: summary } = useSummary('month', { date: selectedDate.toISOString() })
 
   const transactions = data?.data ?? []
+  // Total real do filtro (vem da API), não só o que coube na busca
+  const totalCount = data?.total ?? transactions.length
+  const isTruncated = totalCount > transactions.length
   const monthName = format(selectedDate, "MMMM 'de' yyyy", { locale: ptBR })
   const formattedMonth = monthName.charAt(0).toUpperCase() + monthName.slice(1)
 
@@ -68,7 +75,7 @@ export function MonthTransactionsTable({ selectedDate }: MonthTransactionsTableP
           <div className="flex items-center gap-2">
             <CardTitle>Transações de {formattedMonth}</CardTitle>
             <Badge variant="neutral">
-              {transactions.length} {transactions.length === 1 ? 'item' : 'itens'}
+              {totalCount} {totalCount === 1 ? 'item' : 'itens'}
             </Badge>
           </div>
           <p className="text-xs text-slate-400 font-medium mt-0.5">
@@ -81,7 +88,7 @@ export function MonthTransactionsTable({ selectedDate }: MonthTransactionsTableP
             size="sm"
             onClick={() =>
               openModal({
-                date: format(selectedDate, 'yyyy-MM-15'),
+                date: suggestedDateInMonth(selectedDate, 15),
               })
             }
             leftIcon={<Plus size={14} className="text-emerald-400 stroke-[2.5]" />}
@@ -179,7 +186,7 @@ export function MonthTransactionsTable({ selectedDate }: MonthTransactionsTableP
               filterType === '' ? 'bg-[#111111] text-[#F1ECDA] shadow-xs' : 'text-[#5C6D7C] hover:text-[#111111]'
             )}
           >
-            Todas ({transactions.length})
+            Todas ({totalCount})
           </button>
           <button
             type="button"
@@ -422,6 +429,12 @@ export function MonthTransactionsTable({ selectedDate }: MonthTransactionsTableP
           </>
         )}
       </div>
+
+      {isTruncated && (
+        <p className="border-t border-[#DDD7C0] px-4 py-3 text-center text-xs font-medium text-[#5C6D7C]">
+          Mostrando {transactions.length} de {totalCount}. Veja todas na aba Transações.
+        </p>
+      )}
 
       {/* Delete Confirmation Modal */}
       {deleteTransaction && (

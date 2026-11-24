@@ -158,8 +158,12 @@ export class ReportsService {
     const weeks = eachWeekOfInterval({ start, end }, { weekStartsOn: 0 })
 
     const results = await Promise.all(
-      weeks.map(async (weekStart, index) => {
-        const weekEnd = endOfWeek(weekStart, { weekStartsOn: 0 })
+      weeks.map(async (fullWeekStart, index) => {
+        // A primeira e a última semana são cortadas nos limites do mês, senão
+        // somariam dias do mês anterior/seguinte.
+        const weekStart = fullWeekStart < start ? start : fullWeekStart
+        const fullWeekEnd = endOfWeek(fullWeekStart, { weekStartsOn: 0 })
+        const weekEnd = fullWeekEnd > end ? end : fullWeekEnd
         const totals = await getTotals(userId, accountId, weekStart, weekEnd)
         return {
           week: `Semana ${index + 1}`,
