@@ -8,6 +8,8 @@ import { cn } from '../../lib/utils'
 const GUTTER = 16
 const GAP = 12
 const PADDING = 6
+/** Espaço do header fixo do mobile (h-16) mais folga. */
+const TOP_OFFSET = 80
 
 interface Rect {
   top: number
@@ -54,11 +56,17 @@ export function Tour() {
   // Ao trocar de passo: rola até o alvo e mede.
   useLayoutEffect(() => {
     if (!isOpen) return
-    if (step?.target) {
-      findVisibleTarget(step.target)?.scrollIntoView({
-        block: 'center',
-        behavior: prefersReducedMotion() ? 'auto' : 'smooth',
-      })
+    const el = step?.target ? findVisibleTarget(step.target) : null
+    if (el) {
+      const behavior = prefersReducedMotion() ? 'auto' : 'smooth'
+      const r = el.getBoundingClientRect()
+      const cardHeight = cardRef.current?.offsetHeight || 180
+      // Alvo alto demais para dividir a tela com o balão: alinha o topo dele logo abaixo do header.
+      if (r.height + cardHeight + GAP * 2 > window.innerHeight - TOP_OFFSET) {
+        window.scrollTo({ top: window.scrollY + r.top - TOP_OFFSET, behavior })
+      } else {
+        el.scrollIntoView({ block: 'center', behavior })
+      }
     }
     measure()
   }, [isOpen, step, measure])
@@ -109,8 +117,10 @@ export function Tour() {
   const vh = window.innerHeight
   const isLast = stepIndex === TOUR_STEPS.length - 1
 
-  // Balão abaixo do alvo se couber; senão acima; senão centralizado.
+  // Balão abaixo do alvo se couber; senão acima; senão preso no rodapé, com o destaque
+  // cortado logo acima dele (alvo mais alto que a tela, ex.: previsão no mobile).
   let cardStyle: React.CSSProperties
+  let highlight = rect
   if (rect && cardSize.height) {
     const left = Math.min(
       Math.max(rect.left + rect.width / 2 - cardSize.width / 2, GUTTER),
@@ -118,12 +128,18 @@ export function Tour() {
     )
     const below = rect.top + rect.height + GAP
     const above = rect.top - GAP - cardSize.height
-    const top =
-      below + cardSize.height <= vh - GUTTER
-        ? below
-        : above >= GUTTER
-          ? above
-          : Math.max(GUTTER, (vh - cardSize.height) / 2)
+    let top: number
+    if (below + cardSize.height <= vh - GUTTER) top = below
+    else if (above >= GUTTER) top = above
+    else {
+      top = Math.max(GUTTER, vh - cardSize.height - GUTTER)
+      const visibleTop = Math.max(rect.top, 0)
+      const visibleBottom = Math.min(rect.top + rect.height, top - GAP)
+      highlight =
+        visibleBottom > visibleTop
+          ? { ...rect, top: visibleTop, height: visibleBottom - visibleTop }
+          : null
+    }
     cardStyle = { top, left }
   } else {
     cardStyle = {
@@ -135,14 +151,14 @@ export function Tour() {
   return createPortal(
     <div className="fixed inset-0 z-[110]" aria-live="polite">
       {/* Bloqueia cliques na página enquanto o tour está aberto */}
-      <div className={cn('absolute inset-0', !rect && 'bg-[#111111]/55')} />
+      <div className={cn('absolute inset-0', !highlight && 'bg-[#111111]/55')} />
 
-      {rect && (
+      {highlight && (
         <div
           aria-hidden
           className="pointer-events-none absolute rounded-2xl ring-2 ring-[#F1ECDA] motion-safe:transition-all motion-safe:duration-300"
           style={{
-            ...rect,
+            ...highlight,
             boxShadow: '0 0 0 9999px rgba(17,17,17,0.55)',
           }}
         />
