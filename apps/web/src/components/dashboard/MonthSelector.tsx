@@ -1,16 +1,18 @@
-import { useEffect, useRef } from 'react'
 import { ChevronLeft, ChevronRight, Calendar } from 'lucide-react'
-import { format, addMonths, subMonths } from 'date-fns'
+import { format, addMonths, subMonths, startOfMonth } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 
 interface MonthSelectorProps {
   selectedDate: Date
   onChange: (date: Date) => void
+  availableMonths?: Date[]
 }
 
-export function MonthSelector({ selectedDate, onChange }: MonthSelectorProps) {
-  const chipsRef = useRef<HTMLDivElement>(null)
-
+export function MonthSelector({
+  selectedDate,
+  onChange,
+  availableMonths,
+}: MonthSelectorProps) {
   const handlePrev = () => {
     onChange(subMonths(selectedDate, 1))
   }
@@ -22,23 +24,15 @@ export function MonthSelector({ selectedDate, onChange }: MonthSelectorProps) {
   const monthLabel = format(selectedDate, "MMMM 'de' yyyy", { locale: ptBR })
   const formattedLabel = monthLabel.charAt(0).toUpperCase() + monthLabel.slice(1)
 
-  // Todos os meses do ano selecionado (Jan → Dez)
-  const year = selectedDate.getFullYear()
-  const yearMonths = Array.from({ length: 12 }, (_, i) => new Date(year, i, 1))
-
-  // No mobile a barra rola na horizontal: mantém o mês selecionado visível
-  useEffect(() => {
-    const container = chipsRef.current
-    const chip = container?.querySelector<HTMLElement>('[data-selected="true"]')
-    if (!container || !chip) return
-    const target = chip.offsetLeft - (container.clientWidth - chip.clientWidth) / 2
-    container.scrollTo({ left: target, behavior: 'smooth' })
-  }, [selectedDate])
+  // Sem transações pagas ainda: mostra os últimos 4 meses até o atual
+  const currentMonth = startOfMonth(new Date())
+  const defaultMonths =
+    availableMonths || [3, 2, 1, 0].map((n) => subMonths(currentMonth, n))
 
   return (
     <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5 rounded-2xl border border-[#DDD7C0] bg-[#FAF8F2] p-2 sm:p-2.5 shadow-subtle">
       {/* Month Stepper */}
-      <div className="flex items-center justify-between gap-1.5 sm:gap-2 shrink-0">
+      <div className="flex items-center justify-between gap-1.5 sm:gap-2">
         <button
           type="button"
           onClick={handlePrev}
@@ -67,20 +61,16 @@ export function MonthSelector({ selectedDate, onChange }: MonthSelectorProps) {
         </button>
       </div>
 
-      {/* Month Chips: ano inteiro */}
-      <div
-        ref={chipsRef}
-        className="relative flex items-center gap-1 overflow-x-auto scrollbar-none pt-1 sm:pt-0 border-t sm:border-t-0 border-[#DDD7C0] min-w-0"
-      >
-        {yearMonths.map((m) => {
+      {/* Quick Month Chips */}
+      <div className="flex items-center gap-1 overflow-x-auto scrollbar-none pt-1 sm:pt-0 border-t sm:border-t-0 border-[#DDD7C0] justify-center sm:justify-end">
+        {defaultMonths.map((m) => {
           const isSelected =
             format(selectedDate, 'yyyy-MM') === format(m, 'yyyy-MM')
-          const chipLabel = format(m, 'MMM', { locale: ptBR }).replace('.', '')
+          const chipLabel = format(m, 'MMM', { locale: ptBR })
           return (
             <button
               key={m.toISOString()}
               type="button"
-              data-selected={isSelected}
               onClick={() => onChange(m)}
               className={`rounded-lg px-2.5 py-1 text-xs font-bold transition-all cursor-pointer capitalize shrink-0 ${
                 isSelected
@@ -96,3 +86,4 @@ export function MonthSelector({ selectedDate, onChange }: MonthSelectorProps) {
     </div>
   )
 }
+
