@@ -102,7 +102,7 @@ export class TransactionsService {
     // isso é imperceptível: descriptografar 10.000 registros leva ~50ms.
     const hasSearch = Boolean(params.search?.trim())
 
-    const [rawData, dbTotal] = await Promise.all([
+    const [rawData, dbTotal, dbSums] = await Promise.all([
       prisma.transaction.findMany({
         where,
         include: transactionInclude,
@@ -113,6 +113,11 @@ export class TransactionsService {
       }),
       // O count continua sendo feito no banco para os filtros não-textuais.
       prisma.transaction.count({ where }),
+      // Totais por tipo de TODAS as transações filtradas (não só da página),
+      // para o resumo do topo da lista. Com busca, somamos em memória abaixo.
+      hasSearch
+        ? Promise.resolve([])
+        : prisma.transaction.groupBy({ by: ['type'], where, _sum: { amountCents: true } }),
     ])
 
     // Descriptografa todas as descrições
@@ -133,12 +138,25 @@ export class TransactionsService {
       ? filtered.slice(skip, skip + limit)
       : filtered
 
+    const totals = { incomeCents: 0, expenseCents: 0, investedCents: 0 }
+    const addToTotals = (type: string, cents: number) => {
+      if (type === 'INCOME') totals.incomeCents += cents
+      else if (type === 'EXPENSE') totals.expenseCents += cents
+      else if (type === 'INVESTMENT') totals.investedCents += cents
+    }
+    if (hasSearch) {
+      for (const t of filtered) addToTotals(t.type, t.amountCents)
+    } else {
+      for (const row of dbSums) addToTotals(row.type, row._sum.amountCents ?? 0)
+    }
+
     return {
       data: paginatedData,
       total,
       page,
       limit,
       totalPages: Math.ceil(total / limit),
+      totals,
     }
   }
 

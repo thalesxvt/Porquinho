@@ -78,18 +78,11 @@ export function Transactions() {
   const totalPages = data?.totalPages ?? 1
   const totalItems = data?.total ?? 0
 
-  // Calculate filtered totals for quick financial summary
-  const totalIncomeFiltered = transactions
-    .filter((t: any) => t.type === 'INCOME')
-    .reduce((sum: number, t: any) => sum + t.amountCents, 0)
-
-  const totalExpenseFiltered = transactions
-    .filter((t: any) => t.type === 'EXPENSE')
-    .reduce((sum: number, t: any) => sum + t.amountCents, 0)
-
-  const totalInvestedFiltered = transactions
-    .filter((t: any) => t.type === 'INVESTMENT')
-    .reduce((sum: number, t: any) => sum + t.amountCents, 0)
+  // Resumo do topo: somas de TODAS as transações filtradas, calculadas pela API
+  // (somar só `transactions` daria o total da página atual, não do filtro)
+  const totalIncomeFiltered = data?.totals?.incomeCents ?? 0
+  const totalExpenseFiltered = data?.totals?.expenseCents ?? 0
+  const totalInvestedFiltered = data?.totals?.investedCents ?? 0
 
   const hasActiveFilters = Boolean(search || type || categoryId || selectedMonth || statusFilter)
 

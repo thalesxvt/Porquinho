@@ -69,4 +69,10 @@ export interface PaginatedTransactions {
   page: number
   limit: number
   totalPages: number
+  /** Somas de todas as transações que passam no filtro, não só da página atual */
+  totals: {
+    incomeCents: number
+    expenseCents: number
+    investedCents: number
+  }
 }
