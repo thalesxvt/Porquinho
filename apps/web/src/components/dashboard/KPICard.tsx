@@ -66,7 +66,9 @@ export function KPICard({
 }: KPICardProps) {
   const styles = variantStyles[variant]
   const hasComparison = previousValue !== undefined && previousValue !== null
-  const change = hasComparison ? getPercentageChange(value, previousValue!) : 0
+  // Período anterior zerado: qualquer porcentagem seria enganosa ("100%", "0%").
+  const previousIsZero = hasComparison && previousValue === 0
+  const change = hasComparison && !previousIsZero ? getPercentageChange(value, previousValue!) : 0
   const isPositive = change > 0
   const isNegative = change < 0
 
@@ -121,6 +123,11 @@ export function KPICard({
         customFooter ? (
           <div className="mt-4 pt-3 border-t border-[#DDD7C0] text-xs text-[#5C6D7C]">
             {customFooter}
+          </div>
+        ) : previousIsZero ? (
+          <div className="mt-4 flex items-center gap-1.5 pt-3 border-t border-[#DDD7C0] text-[11px] text-[#758695] font-medium">
+            <Minus size={12} className="stroke-[2.5] shrink-0" />
+            <span className="truncate">Sem movimento no período anterior</span>
           </div>
         ) : hasComparison ? (
           <div className="mt-4 flex items-center gap-2 pt-3 border-t border-[#DDD7C0] text-xs">

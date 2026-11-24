@@ -110,7 +110,9 @@ export class ReportsService {
       previousIncome: previous.income,
       previousExpense: previous.expense,
       previousInvested: previous.invested,
-      previousBalance: previous.balance,
+      // `balance` é o saldo ACUMULADO; compara com o acumulado no fim do período
+      // anterior (= rolloverBalance), não com o resultado só daquele período.
+      previousBalance: rolloverBalance,
     }
   }
 
