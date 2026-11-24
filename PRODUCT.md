@@ -22,9 +22,14 @@ Controle financeiro pessoal direto, visual e rápido. Em vez de ferramentas banc
 ## Capabilities and Constraints
 - **Autenticação:** Cadastro e login de usuários seguros via token JWT.
 - **Transações:** Gestão completa (CRUD) de receitas e despesas com descrição, valor (em centavos no core), data e categoria vinculada.
-- **Painel de Controle:** Cards de KPI em tempo real (Saldo atual, Total de Receitas, Total de Despesas, Economia acumulada).
+- **Tipos de lançamento:** Receita, Despesa e Investimento (tipo próprio, fora do total de despesas).
+- **Contas a pagar/receber:** Lançamentos com status Pendente (data = vencimento) ou Pago; pagamento em 1 toque.
+- **Parcelas e recorrentes:** Compras parceladas e lançamentos mensais recorrentes geram ocorrências individuais, editáveis uma a uma ou "esta e as próximas".
+- **Subcontas:** Carteiras separadas (ex.: conta principal, VR, outro banco), com saldo e relatórios próprios.
+- **Painel de Controle:** Cards de KPI em tempo real (Saldo atual, Receitas, Despesas, Investimentos), próximos vencimentos e previsão de saldo mês a mês com alerta de saldo negativo.
 - **Relatórios & Gráficos:** Filtros temporais (semana, mês, ano), evolução mensal anual e divisão de despesas por categoria (Recharts).
 - **Categorias:** Gerenciamento customizado de categorias com nomes e paletas de cores distintas.
+- **Privacidade:** Descrições dos lançamentos criptografadas em repouso (AES-256-GCM); login com limite de tentativas.
 - **Stack Frontend:** React 19, TypeScript, Vite, Tailwind CSS, Lucide React, TanStack Query, Zustand, React Router DOM v6, Recharts.
 
 ## Brand Commitments
