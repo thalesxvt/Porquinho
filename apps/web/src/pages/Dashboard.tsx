@@ -54,8 +54,10 @@ export function Dashboard() {
   const { data: monthly = [], isLoading: monthlyLoading } = useMonthlyReport(selectedMonthDate.getFullYear())
   const { data: availableMonthsRaw = [] } = useAvailableMonths()
 
-  // Convert 'yyyy-MM' strings to Date objects for MonthSelector (oldest first → most recent on the right)
-  const availableMonths = [...availableMonthsRaw]
+  // Convert 'yyyy-MM' strings to Date objects for MonthSelector: só os 5 mais recentes
+  // (oldest first → most recent on the right)
+  const availableMonths = availableMonthsRaw
+    .slice(0, 5)
     .reverse()
     .map((m: string) => {
       const [year, month] = m.split('-').map(Number)
