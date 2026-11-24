@@ -162,18 +162,27 @@ export function ProfileModal({ isOpen, onClose }: ProfileModalProps) {
           </div>
         </div>
 
-        {/* Action Buttons */}
-        <div className="mt-2 flex items-center justify-end gap-2 pt-3 border-t border-[#DDD7C0]">
+        {/* Tutorial */}
+        <div className="flex items-center justify-between gap-3 pt-3 border-t border-[#DDD7C0]">
+          <div className="min-w-0">
+            <p className="text-xs font-bold text-[#111111]">Tutorial do app</p>
+            <p className="text-[11px] text-[#5C6D7C]">Veja de novo onde fica cada coisa.</p>
+          </div>
           <Button
             type="button"
-            variant="ghost"
+            variant="outline"
+            size="sm"
             onClick={handleReplayTour}
             disabled={loading}
-            leftIcon={<Compass size={15} />}
-            className="mr-auto"
+            leftIcon={<Compass size={14} />}
+            className="shrink-0 whitespace-nowrap"
           >
             Rever tutorial
           </Button>
+        </div>
+
+        {/* Action Buttons */}
+        <div className="mt-2 flex items-center justify-end gap-2 pt-3 border-t border-[#DDD7C0]">
           <Button
             type="button"
             variant="outline"
@@ -185,7 +194,7 @@ export function ProfileModal({ isOpen, onClose }: ProfileModalProps) {
           <Button
             type="submit"
             isLoading={loading}
-            className="bg-[#111111] text-[#F1ECDA] hover:bg-[#222222]"
+            className="whitespace-nowrap bg-[#111111] text-[#F1ECDA] hover:bg-[#222222]"
           >
             Salvar Alterações
           </Button>
